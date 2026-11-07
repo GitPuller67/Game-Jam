@@ -49,6 +49,7 @@ var jumps_remaining: int
 var can_slide: bool = true
 var is_invincible: bool = false
 var is_sliding: bool = false
+var is_crouching: bool = false
 
 
 # --- @onready variables ---
@@ -61,14 +62,37 @@ var is_sliding: bool = false
 @onready var slide_timer: Timer = $SlideTimer
 @onready var slide_cooldown_timer: Timer = $SlideCooldownTimer
 
+# Bullet
+@export var bullet_scene: PackedScene
+@onready var muzzle: Marker2D = $Muzzle
 
 func _on_slide_timer_timeout() -> void:
 	is_sliding = false
 	can_slide = false
+	speed = walk_speed
 	slide_cooldown_timer.start(slide_cooldown)
 	
 func _on_slide_cooldown_timer_timeout() -> void:
 	can_slide = true
+	
+
+# Bullet logic
+func _unhandled_input(event: InputEvent) -> void:
+	if Input.is_action_just_pressed("shoot"):
+		shoot()
+		
+func shoot() -> void:
+	var new_bullet = bullet_scene.instantiate()
+	new_bullet.global_position = muzzle.global_position
+	
+	var aim_vector = Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
+	if aim_vector.length() > 0.1:
+		new_bullet.global_rotation = aim_vector.angle()
+	else:
+		var mouse_position = get_global_mouse_position()
+		new_bullet.look_at(mouse_position)
+	
+	get_tree().current_scene.add_child(new_bullet)
 
 # --- Built-in functions ---
 func _physics_process(delta: float) -> void:
@@ -76,19 +100,12 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 		
-	# Handle crouch.
-	if velocity.x == 0:
-		if Input.is_action_just_released("crouch") and is_on_floor():
-			if speed == walk_speed:
-				animated_sprite.play("crouch")
-				speed = crouch_speed
-			elif speed == crouch_speed:
-				speed = walk_speed
-				
-	else:
+	# Handle crouch.			
+	if velocity.x != 0:
 		if Input.is_action_just_pressed("crouch") and not is_sliding and can_slide:
 			is_sliding = true
 			animated_sprite.play("slide")
+			speed = slide_speed
 			slide_timer.start(slide_duration)
 
 	# Handle jump.
@@ -109,7 +126,10 @@ func _physics_process(delta: float) -> void:
 		pass
 	elif is_on_floor():
 		if direction == 0:
-			animated_sprite.play("default")
+			if is_crouching:
+				animated_sprite.play("crouch")
+			else:
+				animated_sprite.play("default")
 		elif direction != 0 and !is_sliding:
 			animated_sprite.play("run")
 	else:

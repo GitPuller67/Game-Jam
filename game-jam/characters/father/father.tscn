@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cqn55darjdvrk" path="res://characters/father/father.gd" id="1_8d7jq"]
 [ext_resource type="PackedScene" uid="uid://dcl5iwlcdw0j8" path="res://characters/baby/baby.tscn" id="2_paef7"]
+[ext_resource type="PackedScene" uid="uid://d38qf2olsigft" path="res://levels/bullet.tscn" id="2_wxjir"]
 [ext_resource type="Texture2D" uid="uid://cqycq626gqeak" path="res://assets/Temp/sprites/knight.png" id="3_paef7"]
 [ext_resource type="Texture2D" uid="uid://dpofhk0l2jtqg" path="res://assets/spritesheets/player.png" id="3_wxjir"]
 
@@ -133,9 +134,11 @@ animations = [{
 }]
 
 [node name="Father" type="CharacterBody2D" unique_id=2008592885]
+z_index = 5
 script = ExtResource("1_8d7jq")
 slide_duration = 0.8
 slide_cooldown = 0.1
+bullet_scene = ExtResource("2_wxjir")
 
 [node name="StandingCollision" type="CollisionShape2D" parent="." unique_id=208454882]
 z_index = 1
@@ -154,7 +157,7 @@ disabled = true
 shape = SubResource("CircleShape2D_xqh7c")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=666564980]
-zoom = Vector2(2.5, 2.5)
+zoom = Vector2(5, 5)
 
 [node name="SlideTimer" type="Timer" parent="." unique_id=1906812122]
 
@@ -168,6 +171,8 @@ animation = &"slide"
 autoplay = "default"
 
 [node name="Baby" parent="Visuals" unique_id=1142126627 instance=ExtResource("2_paef7")]
+
+[node name="Muzzle" type="Marker2D" parent="." unique_id=631803531]
 
 [connection signal="timeout" from="SlideTimer" to="." method="_on_slide_timer_timeout"]
 [connection signal="timeout" from="SlideCooldownTimer" to="." method="_on_slide_cooldown_timer_timeout"]
