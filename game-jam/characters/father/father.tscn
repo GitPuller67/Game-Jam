@@ -4,8 +4,13 @@
 [ext_resource type="PackedScene" uid="uid://dcl5iwlcdw0j8" path="res://characters/baby/baby.tscn" id="2_paef7"]
 [ext_resource type="Texture2D" uid="uid://cqycq626gqeak" path="res://assets/sprites/knight.png" id="3_paef7"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_g2els"]
-radius = 5.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_oxk3a"]
+radius = 6.0827627
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dloie"]
+radius = 4.1231055
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xqh7c"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_g2els"]
 atlas = ExtResource("3_paef7")
@@ -91,7 +96,7 @@ region = Rect2(192, 96, 32, 32)
 atlas = ExtResource("3_paef7")
 region = Rect2(224, 96, 32, 32)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_wxjir"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_at4b5"]
 animations = [{
 "frames": [{
 "duration": 1.0,
@@ -177,21 +182,20 @@ script = ExtResource("1_8d7jq")
 
 [node name="StandingCollision" type="CollisionShape2D" parent="." unique_id=208454882]
 z_index = 1
-position = Vector2(0, -5)
-shape = SubResource("CircleShape2D_g2els")
+position = Vector2(0, 4)
+shape = SubResource("CircleShape2D_oxk3a")
 
 [node name="SlidingCollision" type="CollisionShape2D" parent="." unique_id=1187105423]
-z_index = 1
-position = Vector2(0, -4)
+z_index = 2
+position = Vector2(0, 6)
+shape = SubResource("CircleShape2D_dloie")
 disabled = true
 
 [node name="CeilingCheck" type="ShapeCast2D" parent="." unique_id=1433619924]
-enabled = false
+shape = SubResource("CircleShape2D_xqh7c")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=666564980]
-position = Vector2(0, -9)
-zoom = Vector2(4, 4)
-position_smoothing_enabled = true
+zoom = Vector2(2.5, 2.5)
 
 [node name="SlideTimer" type="Timer" parent="." unique_id=1906812122]
 
@@ -199,10 +203,8 @@ position_smoothing_enabled = true
 
 [node name="Visuals" type="Node2D" parent="." unique_id=352545580]
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visuals" unique_id=181304595]
-position = Vector2(0, -12)
-sprite_frames = SubResource("SpriteFrames_wxjir")
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visuals" unique_id=1542112518]
+sprite_frames = SubResource("SpriteFrames_at4b5")
 autoplay = "default"
-frame_progress = 0.27390918
 
 [node name="Baby" parent="Visuals" unique_id=1142126627 instance=ExtResource("2_paef7")]
