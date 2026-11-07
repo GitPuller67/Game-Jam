@@ -1,46 +1,39 @@
 [gd_scene format=3 uid="uid://b1xbnoij6viwk"]
 
 [ext_resource type="Script" uid="uid://cqcsm1mrpph3h" path="res://characters/enemy/enemy.gd" id="1_enemy"]
-[ext_resource type="Texture2D" uid="uid://dv1aqcjtfqdch" path="res://assets/Temp/sprites/slime_purple.png" id="2_slime"]
+[ext_resource type="Texture2D" uid="uid://rpp033yw0udu" path="res://assets/spritesheets/scientist.png" id="2_bm2dv"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_idle0"]
-atlas = ExtResource("2_slime")
-region = Rect2(0, 0, 24, 24)
+[sub_resource type="AtlasTexture" id="AtlasTexture_iuxou"]
+atlas = ExtResource("2_bm2dv")
+region = Rect2(0, 0, 48, 51)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_idle1"]
-atlas = ExtResource("2_slime")
-region = Rect2(24, 0, 24, 24)
+[sub_resource type="AtlasTexture" id="AtlasTexture_427j3"]
+atlas = ExtResource("2_bm2dv")
+region = Rect2(48, 0, 48, 51)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_idle2"]
-atlas = ExtResource("2_slime")
-region = Rect2(48, 0, 24, 24)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_idle3"]
-atlas = ExtResource("2_slime")
-region = Rect2(72, 0, 24, 24)
+[sub_resource type="AtlasTexture" id="AtlasTexture_fxr07"]
+atlas = ExtResource("2_bm2dv")
+region = Rect2(96, 0, 48, 51)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_enemy"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_idle0")
+"texture": SubResource("AtlasTexture_iuxou")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_idle1")
+"texture": SubResource("AtlasTexture_427j3")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_idle2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_idle3")
+"texture": SubResource("AtlasTexture_fxr07")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 8.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
-size = Vector2(14, 12)
+size = Vector2(16, 46)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_detect"]
 radius = 120.0
@@ -54,13 +47,13 @@ sprite_frames = SubResource("SpriteFrames_enemy")
 animation = &"idle"
 autoplay = "idle"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -6)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1265495316]
+position = Vector2(0, -10)
 shape = SubResource("RectangleShape2D_body")
 
-[node name="DetectionArea" type="Area2D" parent="."]
+[node name="DetectionArea" type="Area2D" parent="." unique_id=52930825]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea" unique_id=1969749867]
 position = Vector2(0, -6)
 shape = SubResource("CircleShape2D_detect")
 
