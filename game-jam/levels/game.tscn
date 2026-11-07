@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://biefwwwebkkue" path="res://assets/Temp/sprites/world_tileset.png" id="2_yqjtg"]
 [ext_resource type="PackedScene" uid="uid://bv1eyr1ng8pl7" path="res://ui/hud.tscn" id="4_hud"]
 [ext_resource type="PackedScene" uid="uid://bfbygu8vtje3a" path="res://ui/main_menu.tscn" id="5_menu"]
+[ext_resource type="PackedScene" uid="uid://0n26qcv25ci0" path="res://interactables/clock/clock.tscn" id="6_cnc74"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lnu2h"]
 texture = ExtResource("2_yqjtg")
@@ -191,3 +192,6 @@ layer_0/tile_data = PackedInt32Array(196601, 0, 0, 196602, 0, 0, 196603, 0, 0, 1
 
 [node name="MainMenu" parent="." unique_id=1580263319 node_paths=PackedStringArray("hud") instance=ExtResource("5_menu")]
 hud = NodePath("../HUD")
+
+[node name="Clock" parent="." unique_id=1234127530 instance=ExtResource("6_cnc74")]
+position = Vector2(70, 0)
