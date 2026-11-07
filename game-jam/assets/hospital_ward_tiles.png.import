@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dv1aqcjtfqdch"
-path="res://.godot/imported/slime_purple.png-26dc5ddef235ce6a400e78e0d532b050.ctex"
+uid="uid://jh5pdo3olimn"
+path="res://.godot/imported/hospital_ward_tiles.png-29eef39b45fa3e6a3bb39b14025e4129.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/slime_purple.png"
-dest_files=["res://.godot/imported/slime_purple.png-26dc5ddef235ce6a400e78e0d532b050.ctex"]
+source_file="res://assets/hospital_ward_tiles.png"
+dest_files=["res://.godot/imported/hospital_ward_tiles.png-29eef39b45fa3e6a3bb39b14025e4129.ctex"]
 
 [params]
 
