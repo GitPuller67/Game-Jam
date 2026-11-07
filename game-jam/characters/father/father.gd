@@ -58,103 +58,37 @@ var is_invincible: bool = false
 
 
 # --- Built-in functions ---
-func _ready() -> void:
-	pass
-
-
 func _physics_process(delta: float) -> void:
-	pass
+	# Add the gravity.
+	if not is_on_floor():
+		velocity += get_gravity() * delta
 
+	# Handle jump.
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = jump_velocity
 
-func _unhandled_input(event: InputEvent) -> void:
-	pass
+	# Get the input direction: -1, 0, 1
+	var direction := Input.get_axis("move_left", "move_right")
 
+	# Flip the sprite
+	if direction > 0:
+		animated_sprite.flip_h = false
+	elif direction < 0:
+		animated_sprite.flip_h = true
 
-# --- Movement ---
-func get_input_direction() -> float:
-	return 0.0
+	# Play animations
+	if is_on_floor():
+		if direction == 0:
+			animated_sprite.play("default")
+		else:
+			animated_sprite.play("run")
+	else:
+		animated_sprite.play("jump")
 
+	# Apply movement
+	if direction:
+		velocity.x = direction * speed
+	else:
+		velocity.x = move_toward(velocity.x, 0, speed)
 
-func apply_gravity(delta: float) -> void:
-	pass
-
-
-func handle_movement(direction: float, delta: float) -> void:
-	pass
-
-
-func jump() -> void:
-	pass
-
-
-func flip_visuals(direction: float) -> void:
-	pass
-
-
-# --- Sliding ---
-func start_slide() -> void:
-	pass
-
-
-func handle_slide(delta: float) -> void:
-	pass
-
-
-func end_slide() -> void:
-	pass
-
-
-func can_start_slide() -> bool:
-	return false
-
-
-func can_stand_up() -> bool:
-	return false
-
-
-func set_sliding_collision(is_sliding: bool) -> void:
-	pass
-
-
-# --- State and animation ---
-func set_state(new_state: State) -> void:
-	pass
-
-
-func update_state() -> void:
-	pass
-
-
-func update_animation() -> void:
-	pass
-
-
-# --- Health ---
-func take_damage(amount: int) -> void:
-	pass
-
-
-func heal(amount: int) -> void:
-	pass
-
-
-func die() -> void:
-	pass
-
-
-func respawn(spawn_position: Vector2) -> void:
-	pass
-
-
-# --- Baby communication ---
-func _on_baby_ability_used(ability_name: String) -> void:
-	pass
-
-
-# --- Timer callbacks ---
-func _on_slide_timer_timeout() -> void:
-	pass
-
-
-func _on_slide_cooldown_timer_timeout() -> void:
-	pass
+	move_and_slide()
