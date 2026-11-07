@@ -251,6 +251,7 @@ animations = [{
 }]
 
 [node name="Father" type="CharacterBody2D" unique_id=2008592885]
+z_index = 5
 script = ExtResource("1_8d7jq")
 slide_duration = 0.8
 slide_cooldown = 0.1
@@ -270,7 +271,7 @@ disabled = true
 shape = SubResource("CircleShape2D_xqh7c")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=666564980]
-zoom = Vector2(2.5, 2.5)
+zoom = Vector2(5, 5)
 
 [node name="SlideTimer" type="Timer" parent="." unique_id=1906812122]
 

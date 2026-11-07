@@ -49,6 +49,7 @@ var jumps_remaining: int
 var can_slide: bool = true
 var is_invincible: bool = false
 var is_sliding: bool = false
+var is_crouching: bool = false
 
 
 # --- @onready variables ---
@@ -65,6 +66,7 @@ var is_sliding: bool = false
 func _on_slide_timer_timeout() -> void:
 	is_sliding = false
 	can_slide = false
+	speed = walk_speed
 	slide_cooldown_timer.start(slide_cooldown)
 	
 func _on_slide_cooldown_timer_timeout() -> void:
@@ -76,19 +78,12 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 		
-	# Handle crouch.
-	if velocity.x == 0:
-		if Input.is_action_just_released("crouch") and is_on_floor():
-			if speed == walk_speed:
-				animated_sprite.play("crouch")
-				speed = crouch_speed
-			elif speed == crouch_speed:
-				speed = walk_speed
-				
-	else:
+	# Handle crouch.			
+	if velocity.x != 0:
 		if Input.is_action_just_pressed("crouch") and not is_sliding and can_slide:
 			is_sliding = true
 			animated_sprite.play("slide")
+			speed = slide_speed
 			slide_timer.start(slide_duration)
 
 	# Handle jump.
@@ -109,7 +104,10 @@ func _physics_process(delta: float) -> void:
 		pass
 	elif is_on_floor():
 		if direction == 0:
-			animated_sprite.play("default")
+			if is_crouching:
+				animated_sprite.play("crouch")
+			else:
+				animated_sprite.play("default")
 		elif direction != 0 and !is_sliding:
 			animated_sprite.play("run")
 	else:
