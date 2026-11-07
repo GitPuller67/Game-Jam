@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://beorvob7p4x6n" path="res://characters/baby/baby.gd" id="1_6cj4a"]
 
+[ext_resource type="PackedScene" path="res://characters/baby/bubble.tscn" id="2_bubble"]
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_483ub"]
 
 [node name="Baby" type="CharacterBody2D" unique_id=691239316]
@@ -11,3 +13,6 @@ script = ExtResource("1_6cj4a")
 sprite_frames = SubResource("SpriteFrames_483ub")
 
 [node name="AbilityTimer" type="Timer" parent="." unique_id=1216950642]
+
+[node name="Bubble" parent="." instance=ExtResource("2_bubble")]
+top_level = true

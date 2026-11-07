@@ -1,0 +1,70 @@
+[gd_scene format=3 uid="uid://bhp4ylr7pk5fl"]
+
+[ext_resource type="Texture2D" uid="uid://co1tw86td2455" path="res://assets/bubble/bubble_idle_0.png" id="1_bubble_idle_0"]
+[ext_resource type="Script" uid="uid://bvv1kga71485i" path="res://characters/baby/bubble.gd" id="1_mq336"]
+[ext_resource type="Texture2D" uid="uid://t4i13w36yw61" path="res://assets/bubble/bubble_idle_1.png" id="2_bubble_idle_1"]
+[ext_resource type="Texture2D" uid="uid://dbr5052g6eg6w" path="res://assets/bubble/bubble_idle_2.png" id="3_bubble_idle_2"]
+[ext_resource type="Texture2D" uid="uid://dq85at5yp8pin" path="res://assets/bubble/bubble_idle_3.png" id="4_bubble_idle_3"]
+[ext_resource type="Texture2D" uid="uid://ba60iw32cuegu" path="res://assets/bubble/bubble_hover_0.png" id="5_bubble_hover_0"]
+[ext_resource type="Texture2D" uid="uid://ctji3yoai5e54" path="res://assets/bubble/bubble_hover_1.png" id="6_bubble_hover_1"]
+[ext_resource type="Texture2D" uid="uid://dq4t7iujg8wgn" path="res://assets/bubble/bubble_hover_2.png" id="7_bubble_hover_2"]
+[ext_resource type="Texture2D" uid="uid://c5hk6cch4docn" path="res://assets/bubble/bubble_hover_3.png" id="8_bubble_hover_3"]
+[ext_resource type="Texture2D" uid="uid://5gmt8t0tvhq7" path="res://assets/bubble/bubble_hover_4.png" id="9_bubble_hover_4"]
+[ext_resource type="Texture2D" uid="uid://cpveutnkruvks" path="res://assets/bubble/bubble_hover_5.png" id="10_bubble_hover_5"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bubble"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_bubble_idle_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_bubble_idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_bubble_idle_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_bubble_idle_3")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_bubble_hover_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_bubble_hover_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_bubble_hover_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_bubble_hover_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_bubble_hover_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_bubble_hover_5")
+}],
+"loop": 1,
+"name": &"hover",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bubble"]
+radius = 11.0
+
+[node name="Bubble" type="Area2D" unique_id=612823315]
+z_index = 10
+script = ExtResource("1_mq336")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1075585431]
+sprite_frames = SubResource("SpriteFrames_bubble")
+autoplay = "default"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1272476241]
+shape = SubResource("CircleShape2D_bubble")
