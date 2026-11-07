@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://bqpa1nhnp2d6k"]
+
+[ext_resource type="Script" uid="uid://cqn55darjdvrk" path="res://characters/father/father.gd" id="1_8d7jq"]
+[ext_resource type="PackedScene" uid="uid://dcl5iwlcdw0j8" path="res://characters/baby/baby.tscn" id="2_paef7"]
+
+[node name="Father" type="CharacterBody2D" unique_id=2008592885]
+script = ExtResource("1_8d7jq")
+speed = null
+acceleration = null
+friction = null
+jump_velocity = null
+max_jumps = null
+max_health = null
+
+[node name="StandingCollision" type="CollisionShape2D" parent="." unique_id=208454882]
+
+[node name="SlidingCollision" type="CollisionShape2D" parent="." unique_id=1187105423]
+disabled = true
+
+[node name="ShapeCast2D" type="ShapeCast2D" parent="." unique_id=1433619924]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=666564980]
+
+[node name="SlideTimer" type="Timer" parent="." unique_id=1906812122]
+
+[node name="SlideCooldownTimer" type="Timer" parent="." unique_id=1524241924]
+
+[node name="Visuals" type="Node2D" parent="." unique_id=352545580]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visuals" unique_id=1542112518]
+
+[node name="Baby" parent="Visuals" unique_id=1142126627 instance=ExtResource("2_paef7")]

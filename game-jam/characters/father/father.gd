@@ -1,0 +1,160 @@
+class_name Father
+extends CharacterBody2D
+
+
+# --- Signals ---
+signal health_changed(new_health: int, max_health: int)
+signal died
+signal state_changed(new_state: State)
+
+
+# --- Enums ---
+enum State { IDLE, RUN, JUMP, FALL, SLIDE, HURT, DEAD }
+
+
+# --- Constants ---
+const GRAVITY: float = 980.0
+
+
+# --- Exported variables ---
+@export_group("Movement")
+@export var speed: float = 200.0
+@export var acceleration: float = 1200.0
+@export var friction: float = 1000.0
+
+@export_group("Jumping")
+@export var jump_velocity: float = -400.0
+@export var max_jumps: int = 1
+
+@export_group("Slide")
+@export var slide_speed: float = 350.0
+@export var slide_friction: float = 400.0
+@export var slide_duration: float = 0.5
+@export var slide_cooldown: float = 0.3
+@export var min_speed_to_slide: float = 100.0
+
+@export_group("Health")
+@export var max_health: int = 3
+
+
+# --- Regular variables ---
+var health: int
+var current_state: State = State.IDLE
+var facing_direction: int = 1
+var jumps_remaining: int
+var can_slide: bool = true
+var is_invincible: bool = false
+
+
+# --- @onready variables ---
+@onready var standing_collision: CollisionShape2D = $StandingCollision
+@onready var sliding_collision: CollisionShape2D = $SlidingCollision
+@onready var ceiling_check: ShapeCast2D = $CeilingCheck
+@onready var visuals: Node2D = $Visuals
+@onready var animated_sprite: AnimatedSprite2D = $Visuals/AnimatedSprite2D
+@onready var baby: Baby = $Visuals/Baby
+@onready var slide_timer: Timer = $SlideTimer
+@onready var slide_cooldown_timer: Timer = $SlideCooldownTimer
+
+
+# --- Built-in functions ---
+func _ready() -> void:
+	pass
+
+
+func _physics_process(delta: float) -> void:
+	pass
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	pass
+
+
+# --- Movement ---
+func get_input_direction() -> float:
+	return 0.0
+
+
+func apply_gravity(delta: float) -> void:
+	pass
+
+
+func handle_movement(direction: float, delta: float) -> void:
+	pass
+
+
+func jump() -> void:
+	pass
+
+
+func flip_visuals(direction: float) -> void:
+	pass
+
+
+# --- Sliding ---
+func start_slide() -> void:
+	pass
+
+
+func handle_slide(delta: float) -> void:
+	pass
+
+
+func end_slide() -> void:
+	pass
+
+
+func can_start_slide() -> bool:
+	return false
+
+
+func can_stand_up() -> bool:
+	return false
+
+
+func set_sliding_collision(is_sliding: bool) -> void:
+	pass
+
+
+# --- State and animation ---
+func set_state(new_state: State) -> void:
+	pass
+
+
+func update_state() -> void:
+	pass
+
+
+func update_animation() -> void:
+	pass
+
+
+# --- Health ---
+func take_damage(amount: int) -> void:
+	pass
+
+
+func heal(amount: int) -> void:
+	pass
+
+
+func die() -> void:
+	pass
+
+
+func respawn(spawn_position: Vector2) -> void:
+	pass
+
+
+# --- Baby communication ---
+func _on_baby_ability_used(ability_name: String) -> void:
+	pass
+
+
+# --- Timer callbacks ---
+func _on_slide_timer_timeout() -> void:
+	pass
+
+
+func _on_slide_cooldown_timer_timeout() -> void:
+	pass
