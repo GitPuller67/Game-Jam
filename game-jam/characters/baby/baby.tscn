@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://dcl5iwlcdw0j8"]
+
+[ext_resource type="Script" uid="uid://beorvob7p4x6n" path="res://characters/baby/baby.gd" id="1_6cj4a"]
+
+[node name="Baby" type="CharacterBody2D" unique_id=691239316]
+script = ExtResource("1_6cj4a")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=967520711]
+
+[node name="AbilityTimer" type="Timer" parent="." unique_id=1216950642]
