@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cqn55darjdvrk" path="res://characters/father/father.gd" id="1_8d7jq"]
 [ext_resource type="PackedScene" uid="uid://dcl5iwlcdw0j8" path="res://characters/baby/baby.tscn" id="2_paef7"]
+[ext_resource type="PackedScene" uid="uid://d38qf2olsigft" path="res://levels/bullet.tscn" id="2_wxjir"]
 [ext_resource type="Texture2D" uid="uid://cqycq626gqeak" path="res://assets/Temp/sprites/knight.png" id="3_paef7"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_oxk3a"]
@@ -255,6 +256,7 @@ z_index = 5
 script = ExtResource("1_8d7jq")
 slide_duration = 0.8
 slide_cooldown = 0.1
+bullet_scene = ExtResource("2_wxjir")
 
 [node name="StandingCollision" type="CollisionShape2D" parent="." unique_id=208454882]
 z_index = 1
@@ -286,6 +288,8 @@ autoplay = "default"
 frame_progress = 0.65439606
 
 [node name="Baby" parent="Visuals" unique_id=1142126627 instance=ExtResource("2_paef7")]
+
+[node name="Muzzle" type="Marker2D" parent="." unique_id=631803531]
 
 [connection signal="timeout" from="SlideTimer" to="." method="_on_slide_timer_timeout"]
 [connection signal="timeout" from="SlideCooldownTimer" to="." method="_on_slide_cooldown_timer_timeout"]
