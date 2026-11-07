@@ -12,6 +12,10 @@ radius = 4.1231055
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xqh7c"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_paef7"]
+atlas = ExtResource("3_paef7")
+region = Rect2(64, 224, 32, 32)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_g2els"]
 atlas = ExtResource("3_paef7")
 region = Rect2(0, 0, 32, 32)
@@ -96,8 +100,48 @@ region = Rect2(192, 96, 32, 32)
 atlas = ExtResource("3_paef7")
 region = Rect2(224, 96, 32, 32)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_wxjir"]
+atlas = ExtResource("3_paef7")
+region = Rect2(0, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_apai3"]
+atlas = ExtResource("3_paef7")
+region = Rect2(32, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i27nm"]
+atlas = ExtResource("3_paef7")
+region = Rect2(64, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nylc6"]
+atlas = ExtResource("3_paef7")
+region = Rect2(96, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t2cbl"]
+atlas = ExtResource("3_paef7")
+region = Rect2(128, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5jqxk"]
+atlas = ExtResource("3_paef7")
+region = Rect2(160, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3tx74"]
+atlas = ExtResource("3_paef7")
+region = Rect2(192, 160, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n680k"]
+atlas = ExtResource("3_paef7")
+region = Rect2(224, 160, 32, 32)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_at4b5"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_paef7")
+}],
+"loop": 1,
+"name": &"crouch",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_g2els")
@@ -175,10 +219,41 @@ animations = [{
 "loop": 1,
 "name": &"run",
 "speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wxjir")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_apai3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i27nm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nylc6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t2cbl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5jqxk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3tx74")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n680k")
+}],
+"loop": 1,
+"name": &"slide",
+"speed": 10.0
 }]
 
 [node name="Father" type="CharacterBody2D" unique_id=2008592885]
 script = ExtResource("1_8d7jq")
+slide_duration = 0.8
+slide_cooldown = 0.1
 
 [node name="StandingCollision" type="CollisionShape2D" parent="." unique_id=208454882]
 z_index = 1
@@ -205,6 +280,11 @@ zoom = Vector2(2.5, 2.5)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visuals" unique_id=1542112518]
 sprite_frames = SubResource("SpriteFrames_at4b5")
+animation = &"slide"
 autoplay = "default"
+frame_progress = 0.65439606
 
 [node name="Baby" parent="Visuals" unique_id=1142126627 instance=ExtResource("2_paef7")]
+
+[connection signal="timeout" from="SlideTimer" to="." method="_on_slide_timer_timeout"]
+[connection signal="timeout" from="SlideCooldownTimer" to="." method="_on_slide_cooldown_timer_timeout"]

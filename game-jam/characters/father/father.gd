@@ -33,6 +33,10 @@ const GRAVITY: float = 980.0
 @export var slide_cooldown: float = 0.3
 @export var min_speed_to_slide: float = 100.0
 
+@export_group("Crouch")
+@export var walk_speed: float = speed
+@export var crouch_speed: float = 50.0
+
 @export_group("Health")
 @export var max_health: int = 3
 
@@ -44,6 +48,7 @@ var facing_direction: int = 1
 var jumps_remaining: int
 var can_slide: bool = true
 var is_invincible: bool = false
+var is_sliding: bool = false
 
 
 # --- @onready variables ---
@@ -57,11 +62,34 @@ var is_invincible: bool = false
 @onready var slide_cooldown_timer: Timer = $SlideCooldownTimer
 
 
+func _on_slide_timer_timeout() -> void:
+	is_sliding = false
+	can_slide = false
+	slide_cooldown_timer.start(slide_cooldown)
+	
+func _on_slide_cooldown_timer_timeout() -> void:
+	can_slide = true
+
 # --- Built-in functions ---
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+		
+	# Handle crouch.
+	if velocity.x == 0:
+		if Input.is_action_just_released("crouch") and is_on_floor():
+			if speed == walk_speed:
+				animated_sprite.play("crouch")
+				speed = crouch_speed
+			elif speed == crouch_speed:
+				speed = walk_speed
+				
+	else:
+		if Input.is_action_just_pressed("crouch") and not is_sliding and can_slide:
+			is_sliding = true
+			animated_sprite.play("slide")
+			slide_timer.start(slide_duration)
 
 	# Handle jump.
 	if Input.is_action_just_pressed("jump") and is_on_floor():
@@ -77,10 +105,12 @@ func _physics_process(delta: float) -> void:
 		animated_sprite.flip_h = true
 
 	# Play animations
-	if is_on_floor():
+	if is_sliding:
+		pass
+	elif is_on_floor():
 		if direction == 0:
 			animated_sprite.play("default")
-		else:
+		elif direction != 0 and !is_sliding:
 			animated_sprite.play("run")
 	else:
 		animated_sprite.play("jump")
