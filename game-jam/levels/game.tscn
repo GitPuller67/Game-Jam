@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dsv1yaispraxf"]
 
-[ext_resource type="PackedScene" uid="uid://1jo7eyjmptkf" path="res://scenes/player.tscn" id="1_uwrxv"]
 [ext_resource type="Texture2D" uid="uid://biefwwwebkkue" path="res://assets/sprites/world_tileset.png" id="2_yqjtg"]
+[ext_resource type="PackedScene" uid="uid://bqpa1nhnp2d6k" path="res://characters/father/father.tscn" id="3_lnu2h"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lnu2h"]
 texture = ExtResource("2_yqjtg")
@@ -174,15 +174,10 @@ sources/0 = SubResource("TileSetAtlasSource_lnu2h")
 
 [node name="Game" type="Node2D" unique_id=954410085]
 
-[node name="CharacterBody2D" parent="." unique_id=756164069 instance=ExtResource("1_uwrxv")]
-position = Vector2(22, 25)
-
-[node name="Camera2D" type="Camera2D" parent="CharacterBody2D" unique_id=1853984754]
-position = Vector2(0, -8)
-zoom = Vector2(4, 4)
-position_smoothing_enabled = true
-
 [node name="TileMap" type="TileMap" parent="." unique_id=1532398510]
 tile_set = SubResource("TileSet_0e51w")
 format = 2
 layer_0/tile_data = PackedInt32Array(196601, 0, 0, 196602, 0, 0, 196603, 0, 0, 196604, 0, 0, 196605, 0, 0, 196606, 0, 0, 196607, 0, 0, 131072, 0, 0, 131073, 0, 0, 131074, 0, 0, 131075, 0, 0, 131076, 0, 0, 131077, 0, 0, 131078, 0, 0, 131079, 0, 0, 131080, 0, 0, 131081, 0, 0)
+
+[node name="Father" parent="." unique_id=2008592885 instance=ExtResource("3_lnu2h")]
+position = Vector2(65, -19)
