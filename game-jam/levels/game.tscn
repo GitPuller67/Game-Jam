@@ -274,6 +274,7 @@ sources/2 = SubResource("TileSetAtlasSource_vhr6a")
 [node name="Game" type="Node2D" unique_id=954410085]
 
 [node name="Father" parent="." unique_id=2008592885 instance=ExtResource("1_lbhrr")]
+max_ammo = 20
 
 [node name="Enemy" parent="." unique_id=1550252557 instance=ExtResource("1_lnu2h")]
 position = Vector2(-135, 1)

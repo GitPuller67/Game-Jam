@@ -1,19 +1,117 @@
 [gd_scene format=3 uid="uid://d38qf2olsigft"]
 
-[ext_resource type="Texture2D" uid="uid://dddgc25p8tqpc" path="res://assets/Temp/bullet-2.png" id="1_gwo85"]
+[ext_resource type="Texture2D" uid="uid://4h8apf7mt1in" path="res://assets/spritesheets/scalpel_projectile_sheet.png" id="1_scalpel"]
 [ext_resource type="Script" uid="uid://c6p2brapn7w4d" path="res://bullet.gd" id="1_wpoqv"]
+[ext_resource type="Texture2D" uid="uid://chdv37hy3fv8d" path="res://assets/spritesheets/scalpel_impact_sheet.png" id="2_impact"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_0e51w"]
-size = Vector2(73, 33)
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact0"]
+atlas = ExtResource("2_impact")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact1"]
+atlas = ExtResource("2_impact")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact2"]
+atlas = ExtResource("2_impact")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact3"]
+atlas = ExtResource("2_impact")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spin0"]
+atlas = ExtResource("1_scalpel")
+region = Rect2(0, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spin1"]
+atlas = ExtResource("1_scalpel")
+region = Rect2(20, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spin2"]
+atlas = ExtResource("1_scalpel")
+region = Rect2(40, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spin3"]
+atlas = ExtResource("1_scalpel")
+region = Rect2(60, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spin4"]
+atlas = ExtResource("1_scalpel")
+region = Rect2(80, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spin5"]
+atlas = ExtResource("1_scalpel")
+region = Rect2(100, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spin6"]
+atlas = ExtResource("1_scalpel")
+region = Rect2(120, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spin7"]
+atlas = ExtResource("1_scalpel")
+region = Rect2(140, 0, 20, 20)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_scalpel"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_impact3")
+}],
+"loop": 0,
+"name": &"impact",
+"speed": 15.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spin0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spin1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spin2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spin3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spin4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spin5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spin6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spin7")
+}],
+"loop": 1,
+"name": &"spin",
+"speed": 24.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_scalpel"]
+size = Vector2(16, 4)
 
 [node name="Bullet" type="Area2D" unique_id=2027033426]
-scale = Vector2(0.06865072, 0.06865072)
+z_index = 5
 script = ExtResource("1_wpoqv")
+speed = 200.0
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=143778641]
-position = Vector2(-1, 1)
-texture = ExtResource("1_gwo85")
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=143778641]
+sprite_frames = SubResource("SpriteFrames_scalpel")
+animation = &"spin"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=460346559]
-position = Vector2(-60.5, 1.5)
-shape = SubResource("RectangleShape2D_0e51w")
+shape = SubResource("RectangleShape2D_scalpel")

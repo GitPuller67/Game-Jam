@@ -5,11 +5,12 @@
 [ext_resource type="PackedScene" uid="uid://d38qf2olsigft" path="res://levels/bullet.tscn" id="2_wxjir"]
 [ext_resource type="Texture2D" uid="uid://cqycq626gqeak" path="res://assets/Temp/sprites/knight.png" id="3_paef7"]
 [ext_resource type="Texture2D" uid="uid://btvwkyqvetm5b" path="res://assets/spritesheets/player_armless.png" id="3_wxjir"]
-[ext_resource type="Script" path="res://characters/father/arms.gd" id="4_arms"]
+[ext_resource type="Script" uid="uid://dnbjivv6npecv" path="res://characters/father/arms.gd" id="4_arms"]
 [ext_resource type="Texture2D" uid="uid://c6eajovx3hxs5" path="res://assets/spritesheets/player_arm.png" id="5_arm"]
+[ext_resource type="Texture2D" uid="uid://4h8apf7mt1in" path="res://assets/spritesheets/scalpel_projectile_sheet.png" id="6_scalpel"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_oxk3a"]
-radius = 6.0827627
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0hqat"]
+size = Vector2(8.421053, 11.898017)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_dloie"]
 radius = 4.1231055
@@ -144,9 +145,10 @@ bullet_scene = ExtResource("2_wxjir")
 
 [node name="StandingCollision" type="CollisionShape2D" parent="." unique_id=208454882]
 z_index = 1
-position = Vector2(0, 4)
-scale = Vector2(-1.9, -3.53)
-shape = SubResource("CircleShape2D_oxk3a")
+position = Vector2(-4, 4.0000005)
+rotation = 3.1415925
+scale = Vector2(1.9, 3.53)
+shape = SubResource("RectangleShape2D_0hqat")
 
 [node name="SlidingCollision" type="CollisionShape2D" parent="." unique_id=1187105423]
 z_index = 2
@@ -172,17 +174,16 @@ sprite_frames = SubResource("SpriteFrames_at4b5")
 animation = &"slide"
 autoplay = "default"
 
-[node name="Arms" type="Node2D" parent="Visuals" node_paths=PackedStringArray("father_sprite")]
+[node name="Arms" type="Node2D" parent="Visuals" unique_id=1790449768 node_paths=PackedStringArray("father_sprite")]
 script = ExtResource("4_arms")
 father_sprite = NodePath("../AnimatedSprite2D")
 
-[node name="BackArm" type="Sprite2D" parent="Visuals/Arms"]
-z_index = -1
-texture = ExtResource("5_arm")
-centered = false
-offset = Vector2(-2.5, -2.5)
+[node name="HeldScalpel" type="Sprite2D" parent="Visuals/Arms" unique_id=1662352028]
+texture = ExtResource("6_scalpel")
+region_enabled = true
+region_rect = Rect2(0, 0, 20, 20)
 
-[node name="FrontArm" type="Sprite2D" parent="Visuals/Arms"]
+[node name="FrontArm" type="Sprite2D" parent="Visuals/Arms" unique_id=1467528179]
 texture = ExtResource("5_arm")
 centered = false
 offset = Vector2(-2.5, -2.5)
@@ -193,6 +194,7 @@ father_sprite = NodePath("../AnimatedSprite2D")
 [node name="Muzzle" type="Marker2D" parent="." unique_id=631803531]
 
 [node name="Aim Laser" type="Line2D" parent="Muzzle" unique_id=1903356037]
+visible = false
 points = PackedVector2Array(0, 0, 500, 0)
 width = 2.0
 default_color = Color(1, 0, 0, 1)
