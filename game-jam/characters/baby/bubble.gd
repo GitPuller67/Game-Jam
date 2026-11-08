@@ -33,21 +33,18 @@ var _press_pending := false
 var _rewound_this_hold := false
 
 @export_group("Energy")
-## The baby's energy (HUD "Baby energy" bar). Time powers use it up; it refills when they're not in use.
+## The baby's energy (HUD "Baby energy" bar). Time powers use it up; it only refills while the
+## Father soothes the baby (hold X, see Father.soothe_rate and add_energy()).
 @export var max_energy: float = 100.0
 ## Per second while slowing / speeding something (scaled by how far the stick is pushed).
 @export var time_drain: float = 22.0
 ## Per second while rewinding.
 @export var rewind_drain: float = 30.0
-@export var energy_regen: float = 18.0
-## Seconds after the last use before it starts refilling.
-@export var regen_delay: float = 0.6
-## After running dry, powers stay off until it has refilled to this much.
+## After running dry, powers stay off until soothing has refilled it to this much.
 @export var restart_energy: float = 25.0
 signal energy_changed(energy: float, max_energy: float)
 var energy: float = 100.0
 var exhausted := false
-var _regen_wait := 0.0
 
 @export_group("Time control")
 ## Time factor with the stick pushed fully left (0.15 = 15% speed).
@@ -71,9 +68,22 @@ func _ready() -> void:
 	global_position = get_global_mouse_position()
 
 
+## The mouse only takes over the bubble when there's no second controller (the baby's), and only
+## after a deliberate movement: otherwise a nudge of the mouse / trackpad snapped the bubble to the
+## cursor wherever it happened to be.
+const MOUSE_TAKEOVER_DISTANCE := 24.0
+var _mouse_moved := 0.0
+
+
 func _input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
-		using_mouse = true
+	if event is InputEventMouseMotion and not using_mouse:
+		if Input.get_connected_joypads().has(1):
+			_mouse_moved = 0.0
+			return
+		_mouse_moved += (event as InputEventMouseMotion).relative.length()
+		if _mouse_moved >= MOUSE_TAKEOVER_DISTANCE:
+			using_mouse = true
+			_mouse_moved = 0.0
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -104,11 +114,14 @@ func _move(delta: float) -> void:
 		_stick_velocity = Vector2.ZERO
 		return
 
+	if using_mouse and Input.get_connected_joypads().has(1):
+		using_mouse = false   # the baby has a controller: the stick drives the bubble
 	# Speed follows how far the stick is pushed (dynamic), with a little acceleration.
 	var dir := Input.get_vector("bubble_left", "bubble_right", "bubble_up", "bubble_down")
 	var target_velocity := Vector2.ZERO
 	if dir != Vector2.ZERO:
 		using_mouse = false
+		_mouse_moved = 0.0
 		target_velocity = dir.normalized() * stick_speed * pow(minf(dir.length(), 1.0), stick_curve)
 	_stick_velocity = _stick_velocity.move_toward(target_velocity, stick_acceleration * delta)
 	if not using_mouse:
@@ -240,17 +253,12 @@ func _update_energy(delta: float) -> void:
 		drain = time_drain * clampf(0.35 + 0.65 * strength, 0.35, 1.0)
 	if drain > 0.0:
 		energy = maxf(energy - drain * delta, 0.0)
-		_regen_wait = regen_delay
 		if energy <= 0.0 and not exhausted:
 			exhausted = true
 			_reset_all_time()
 			_stop_all_rewind()
 			time_mode = TimeMode.NORMAL
 			time_factor = 1.0
-	else:
-		_regen_wait -= delta
-		if _regen_wait <= 0.0:
-			energy = minf(energy + energy_regen * delta, max_energy)
 	if exhausted and energy >= restart_energy:
 		exhausted = false
 	modulate = Color(0.6, 0.6, 0.65, 0.7) if exhausted else Color.WHITE

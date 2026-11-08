@@ -55,17 +55,6 @@
 [ext_resource type="Texture2D" path="res://assets/gen/wall_cracks.png" id="53_mm3rj"]
 [ext_resource type="Texture2D" path="res://assets/gen/ceiling_panel.png" id="54_vije8"]
 [ext_resource type="Texture2D" path="res://assets/gen/mote.png" id="55_01gk8"]
-[ext_resource type="Script" path="res://scripts/pillar.gd" id="56_vay0h"]
-[ext_resource type="Texture2D" path="res://assets/art/pillar1_tall_sheet.png" id="57_avuef"]
-[ext_resource type="Script" path="res://scripts/floating_platform.gd" id="58_sfq6p"]
-[ext_resource type="Texture2D" path="res://assets/art/chunk_tall_1.png" id="59_kne7m"]
-[ext_resource type="Texture2D" path="res://assets/gen/pebble.png" id="60_mtped"]
-[ext_resource type="Texture2D" path="res://assets/art/pillar2_tall_sheet.png" id="61_wv5le"]
-[ext_resource type="Texture2D" path="res://assets/art/chunk_tall_2.png" id="62_y4jly"]
-[ext_resource type="Texture2D" path="res://assets/art/pillar3_tall_sheet.png" id="63_s200x"]
-[ext_resource type="Texture2D" path="res://assets/art/chunk_tall_3.png" id="64_k3xff"]
-[ext_resource type="Texture2D" path="res://assets/art/pillar4_tall_sheet.png" id="65_4w5b2"]
-[ext_resource type="Texture2D" path="res://assets/art/chunk_tall_4.png" id="66_84kwk"]
 [ext_resource type="Script" path="res://scripts/vent.gd" id="67_tts5r"]
 [ext_resource type="Texture2D" path="res://assets/gen/vent_panel.png" id="68_7pevp"]
 [ext_resource type="Script" path="res://scripts/uncanny_room.gd" id="69_2wpyj"]
@@ -270,406 +259,6 @@ region = Rect2(0, 0, 64, 32)
 [sub_resource type="AtlasTexture" id="AtlasTexture_2vya5"]
 atlas = ExtResource("45_gmmge")
 region = Rect2(0, 0, 64, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_uvkqp"]
-atlas = ExtResource("57_avuef")
-region = Rect2(32, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_kw8b3"]
-atlas = ExtResource("57_avuef")
-region = Rect2(32, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1tmos"]
-atlas = ExtResource("57_avuef")
-region = Rect2(64, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_u8q1m"]
-atlas = ExtResource("57_avuef")
-region = Rect2(64, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_t1h24"]
-atlas = ExtResource("57_avuef")
-region = Rect2(96, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_g6s57"]
-atlas = ExtResource("57_avuef")
-region = Rect2(128, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_i2jbj"]
-atlas = ExtResource("57_avuef")
-region = Rect2(96, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_rbi3f"]
-atlas = ExtResource("57_avuef")
-region = Rect2(128, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_cfos3"]
-atlas = ExtResource("57_avuef")
-region = Rect2(160, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_xammt"]
-atlas = ExtResource("57_avuef")
-region = Rect2(0, 0, 32, 192)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_bp5dc"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_uvkqp")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_kw8b3")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1tmos")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_u8q1m")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_t1h24")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_g6s57")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_i2jbj")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_rbi3f")
-}],
-"loop": 0,
-"name": &"break",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_cfos3")
-}],
-"loop": 0,
-"name": &"broken",
-"speed": 1.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_xammt")
-}],
-"loop": 0,
-"name": &"intact",
-"speed": 1.0
-}]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ty1dh"]
-size = Vector2(24, 192)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_iydun"]
-size = Vector2(24, 107)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_xdqja"]
-size = Vector2(24, 12)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_dj84g"]
-size = Vector2(24, 14)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vwwe1"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(32, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_g45ns"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(32, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_i3pxg"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(64, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_l1i1s"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(64, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_y02tt"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(96, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6310c"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(128, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_cwdjb"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(96, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_hmvko"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(128, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_bkim2"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(160, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1de4r"]
-atlas = ExtResource("61_wv5le")
-region = Rect2(0, 0, 32, 192)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_8lghw"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_vwwe1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_g45ns")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_i3pxg")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_l1i1s")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_y02tt")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6310c")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_cwdjb")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_hmvko")
-}],
-"loop": 0,
-"name": &"break",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_bkim2")
-}],
-"loop": 0,
-"name": &"broken",
-"speed": 1.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1de4r")
-}],
-"loop": 0,
-"name": &"intact",
-"speed": 1.0
-}]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_cimyb"]
-size = Vector2(24, 192)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_orwm6"]
-size = Vector2(24, 79)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_bvacq"]
-size = Vector2(24, 19)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ym7r4"]
-size = Vector2(24, 14)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_payem"]
-atlas = ExtResource("63_s200x")
-region = Rect2(32, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_aptpp"]
-atlas = ExtResource("63_s200x")
-region = Rect2(32, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_7pggb"]
-atlas = ExtResource("63_s200x")
-region = Rect2(64, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_l1rwy"]
-atlas = ExtResource("63_s200x")
-region = Rect2(64, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ndlm0"]
-atlas = ExtResource("63_s200x")
-region = Rect2(96, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_txw30"]
-atlas = ExtResource("63_s200x")
-region = Rect2(128, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_saoic"]
-atlas = ExtResource("63_s200x")
-region = Rect2(96, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vjp2y"]
-atlas = ExtResource("63_s200x")
-region = Rect2(128, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_g5uqc"]
-atlas = ExtResource("63_s200x")
-region = Rect2(160, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_jx2t0"]
-atlas = ExtResource("63_s200x")
-region = Rect2(0, 0, 32, 192)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_0vot5"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_payem")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_aptpp")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_7pggb")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_l1rwy")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ndlm0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_txw30")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_saoic")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_vjp2y")
-}],
-"loop": 0,
-"name": &"break",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_g5uqc")
-}],
-"loop": 0,
-"name": &"broken",
-"speed": 1.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_jx2t0")
-}],
-"loop": 0,
-"name": &"intact",
-"speed": 1.0
-}]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_11xqp"]
-size = Vector2(24, 192)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_7mobu"]
-size = Vector2(24, 51)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_himmb"]
-size = Vector2(24, 47)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8tdjg"]
-size = Vector2(24, 14)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6mtqf"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(32, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3b3as"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(32, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_mb8wf"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(64, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_4n7y5"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(64, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_kkdon"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(96, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_662px"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(128, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_buqba"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(96, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ikwe3"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(128, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_evxnq"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(160, 0, 32, 192)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_bnm4c"]
-atlas = ExtResource("65_4w5b2")
-region = Rect2(0, 0, 32, 192)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_64scp"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6mtqf")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3b3as")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_mb8wf")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_4n7y5")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_kkdon")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_662px")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_buqba")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ikwe3")
-}],
-"loop": 0,
-"name": &"break",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_evxnq")
-}],
-"loop": 0,
-"name": &"broken",
-"speed": 1.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_bnm4c")
-}],
-"loop": 0,
-"name": &"intact",
-"speed": 1.0
-}]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_3bvib"]
-size = Vector2(24, 192)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_t3i82"]
-size = Vector2(24, 23)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_gsyvi"]
-size = Vector2(24, 75)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_iifyu"]
-size = Vector2(24, 14)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5f6ay"]
 size = Vector2(14, 64)
@@ -2433,10 +2022,10 @@ position = Vector2(2216, -228)
 texture = ExtResource("35_lxas6")
 centered = false
 
-[node name="Room4_Pillars" type="Node2D" parent="Rooms" unique_id=172068474]
+[node name="Room4_Collapse" type="Node2D" parent="Rooms" unique_id=172068474]
 script = ExtResource("46_dil6y")
 
-[node name="EditorNote" type="Label" parent="Rooms/Room4_Pillars" unique_id=175701142]
+[node name="EditorNote" type="Label" parent="Rooms/Room4_Collapse" unique_id=175701142]
 z_index = 60
 offset_left = 2392.0
 offset_top = -360.0
@@ -2446,112 +2035,112 @@ theme_override_font_sizes/font_size = 8
 theme_override_colors/font_color = Color(1, 0.95, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 3
-text = "ROOM 4 - Pillars
-Each column cracks, bursts and leaves a floating chunk.
-The chunks make a staircase up to the vent duct (top right).
-Room4_Pillars.demo_autoplay breaks them automatically."
+text = "ROOM 4 - Collapse
+Chunks of ceiling keep falling in front of the vent duct (top right).
+Slow one down with the bubble and jump onto it to climb up to the vent.
+The chunks are spawned at runtime by room4_controller.gd (demo_autoplay starts it)."
 script = ExtResource("2_p8dqi")
 
-[node name="Props" type="Node2D" parent="Rooms/Room4_Pillars" unique_id=803949699]
+[node name="Props" type="Node2D" parent="Rooms/Room4_Collapse" unique_id=803949699]
 
-[node name="WardDoors" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=1562332970]
+[node name="WardDoors" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=1562332970]
 z_index = -7
 position = Vector2(2392, -256)
 texture = ExtResource("40_3v472")
 centered = false
 
-[node name="HighWindowLeft" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=2073137787]
+[node name="HighWindowLeft" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=2073137787]
 z_index = -18
 position = Vector2(2420, -360)
 texture = ExtResource("29_84w0p")
 centered = false
 
-[node name="HighWindowRight" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=1085094445]
+[node name="HighWindowRight" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=1085094445]
 z_index = -18
 position = Vector2(2580, -360)
 texture = ExtResource("29_84w0p")
 centered = false
 
-[node name="MedCabinet" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=957827243]
+[node name="MedCabinet" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=957827243]
 z_index = -6
 position = Vector2(2452, -274)
 texture = ExtResource("47_bam6n")
 centered = false
 
-[node name="SupplyCart" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=1614845070]
+[node name="SupplyCart" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=1614845070]
 z_index = -5
 position = Vector2(2448, -222)
 texture = ExtResource("48_y4r7y")
 centered = false
 
-[node name="ParkedGurney" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=1903766943]
+[node name="ParkedGurney" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=1903766943]
 z_index = -5
 position = Vector2(2490, -224)
 texture = SubResource("AtlasTexture_2vya5")
 centered = false
 
-[node name="WaitingChairs" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=421601131]
+[node name="WaitingChairs" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=421601131]
 z_index = -5
 position = Vector2(2574, -220)
 texture = ExtResource("38_gr03m")
 centered = false
 
-[node name="Wheelchair" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=2117174590]
+[node name="Wheelchair" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=2117174590]
 z_index = -5
 position = Vector2(2636, -224)
 texture = ExtResource("49_4p82w")
 centered = false
 
-[node name="Plant" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=1014221778]
+[node name="Plant" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=1014221778]
 z_index = -5
 position = Vector2(2680, -228)
 texture = ExtResource("35_lxas6")
 centered = false
 
-[node name="Extinguisher" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=664020947]
+[node name="Extinguisher" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=664020947]
 z_index = -6
 position = Vector2(2560, -236)
 texture = ExtResource("42_tcqdi")
 centered = false
 
-[node name="CautionSign" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=1933447666]
+[node name="CautionSign" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=1933447666]
 z_index = -6
 position = Vector2(2706, -270)
 texture = ExtResource("50_eb0m6")
 centered = false
 
-[node name="KeepOutSign" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=286973083]
+[node name="KeepOutSign" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=286973083]
 z_index = -3
 position = Vector2(2730, -216)
 texture = ExtResource("51_3g00k")
 centered = false
 
-[node name="Barrier" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=395817443]
+[node name="Barrier" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=395817443]
 z_index = -4
 position = Vector2(2712, -214)
 texture = ExtResource("52_5pah3")
 centered = false
 
-[node name="WallCracks1" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=1222230095]
+[node name="WallCracks1" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=1222230095]
 z_index = -17
 position = Vector2(2744, -384)
 texture = ExtResource("53_mm3rj")
 centered = false
 
-[node name="WallCracks2" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=191290843]
+[node name="WallCracks2" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=191290843]
 z_index = -17
 position = Vector2(2900, -300)
 texture = ExtResource("53_mm3rj")
 centered = false
 flip_h = true
 
-[node name="HangingCeilingPanel" type="Sprite2D" parent="Rooms/Room4_Pillars/Props" unique_id=1283111439]
+[node name="HangingCeilingPanel" type="Sprite2D" parent="Rooms/Room4_Collapse/Props" unique_id=1283111439]
 z_index = -2
 position = Vector2(2756, -384)
 texture = ExtResource("54_vije8")
 centered = false
 
-[node name="FallingGrit" type="CPUParticles2D" parent="Rooms/Room4_Pillars/Props" unique_id=514595958]
+[node name="FallingGrit" type="CPUParticles2D" parent="Rooms/Room4_Collapse/Props" unique_id=514595958]
 position = Vector2(2770, -378)
 amount = 10
 texture = ExtResource("55_01gk8")
@@ -2566,249 +2155,23 @@ initial_velocity_min = 4.0
 initial_velocity_max = 12.0
 color = Color(0.85, 0.85, 0.8, 0.8)
 
-[node name="Pillars" type="Node2D" parent="Rooms/Room4_Pillars" unique_id=2003929661]
-
-[node name="Pillar1" type="Node2D" parent="Rooms/Room4_Pillars/Pillars" unique_id=1751823599]
-position = Vector2(2804, -384)
-script = ExtResource("56_vay0h")
-
-[node name="Sprite" type="AnimatedSprite2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1" unique_id=270138497]
-position = Vector2(-16, 0)
-sprite_frames = SubResource("SpriteFrames_bp5dc")
-animation = &"intact"
-autoplay = "intact"
-centered = false
-
-[node name="Body" type="StaticBody2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1" unique_id=728845474]
-
-[node name="Intact" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1/Body" unique_id=2025471211]
-position = Vector2(0, 96)
-shape = SubResource("RectangleShape2D_ty1dh")
-
-[node name="TopStump" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1/Body" unique_id=1191756802]
-position = Vector2(0, 53.5)
-shape = SubResource("RectangleShape2D_iydun")
-
-[node name="BottomStump" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1/Body" unique_id=59789757]
-position = Vector2(0, 186)
-shape = SubResource("RectangleShape2D_xdqja")
-
-[node name="Chunk" type="AnimatableBody2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1" unique_id=1438452453]
-position = Vector2(0, 167)
-script = ExtResource("58_sfq6p")
-phase = 1.3
-
-[node name="Sprite" type="Sprite2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1/Chunk" unique_id=108648793]
-position = Vector2(-14, -6)
-texture = ExtResource("59_kne7m")
-centered = false
-
-[node name="Shape" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1/Chunk" unique_id=722911214]
-position = Vector2(0, 7)
-shape = SubResource("RectangleShape2D_dj84g")
-
-[node name="Rubble" type="CPUParticles2D" parent="Rooms/Room4_Pillars/Pillars/Pillar1" unique_id=999623821]
-z_index = 3
-position = Vector2(0, 143.5)
-emitting = false
-amount = 40
-texture = ExtResource("60_mtped")
-lifetime = 0.8
-one_shot = true
-explosiveness = 0.95
-emission_shape = 3
-emission_rect_extents = Vector2(12, 36.5)
-direction = Vector2(0, -1)
-spread = 75.0
-gravity = Vector2(0, 320)
-initial_velocity_min = 30.0
-initial_velocity_max = 95.0
-
-[node name="Pillar2" type="Node2D" parent="Rooms/Room4_Pillars/Pillars" unique_id=1053612832]
-position = Vector2(2860, -384)
-script = ExtResource("56_vay0h")
-
-[node name="Sprite" type="AnimatedSprite2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2" unique_id=2053344799]
-position = Vector2(-16, 0)
-sprite_frames = SubResource("SpriteFrames_8lghw")
-animation = &"intact"
-autoplay = "intact"
-centered = false
-
-[node name="Body" type="StaticBody2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2" unique_id=1262151371]
-
-[node name="Intact" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2/Body" unique_id=1147638236]
-position = Vector2(0, 96)
-shape = SubResource("RectangleShape2D_cimyb")
-
-[node name="TopStump" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2/Body" unique_id=1397242933]
-position = Vector2(0, 39.5)
-shape = SubResource("RectangleShape2D_orwm6")
-
-[node name="BottomStump" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2/Body" unique_id=1477140922]
-position = Vector2(0, 182.5)
-shape = SubResource("RectangleShape2D_bvacq")
-
-[node name="Chunk" type="AnimatableBody2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2" unique_id=1815374258]
-position = Vector2(0, 139)
-script = ExtResource("58_sfq6p")
-phase = 2.6
-
-[node name="Sprite" type="Sprite2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2/Chunk" unique_id=1009610012]
-position = Vector2(-14, -6)
-texture = ExtResource("62_y4jly")
-centered = false
-
-[node name="Shape" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2/Chunk" unique_id=450850332]
-position = Vector2(0, 7)
-shape = SubResource("RectangleShape2D_ym7r4")
-
-[node name="Rubble" type="CPUParticles2D" parent="Rooms/Room4_Pillars/Pillars/Pillar2" unique_id=1823436646]
-z_index = 3
-position = Vector2(0, 126)
-emitting = false
-amount = 40
-texture = ExtResource("60_mtped")
-lifetime = 0.8
-one_shot = true
-explosiveness = 0.95
-emission_shape = 3
-emission_rect_extents = Vector2(12, 47)
-direction = Vector2(0, -1)
-spread = 75.0
-gravity = Vector2(0, 320)
-initial_velocity_min = 30.0
-initial_velocity_max = 95.0
-
-[node name="Pillar3" type="Node2D" parent="Rooms/Room4_Pillars/Pillars" unique_id=1614985751]
-position = Vector2(2916, -384)
-script = ExtResource("56_vay0h")
-
-[node name="Sprite" type="AnimatedSprite2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3" unique_id=1948218765]
-position = Vector2(-16, 0)
-sprite_frames = SubResource("SpriteFrames_0vot5")
-animation = &"intact"
-autoplay = "intact"
-centered = false
-
-[node name="Body" type="StaticBody2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3" unique_id=342312170]
-
-[node name="Intact" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3/Body" unique_id=1532191180]
-position = Vector2(0, 96)
-shape = SubResource("RectangleShape2D_11xqp")
-
-[node name="TopStump" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3/Body" unique_id=484584666]
-position = Vector2(0, 25.5)
-shape = SubResource("RectangleShape2D_7mobu")
-
-[node name="BottomStump" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3/Body" unique_id=1922106586]
-position = Vector2(0, 168.5)
-shape = SubResource("RectangleShape2D_himmb")
-
-[node name="Chunk" type="AnimatableBody2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3" unique_id=1846824175]
-position = Vector2(0, 111)
-script = ExtResource("58_sfq6p")
-phase = 3.9000000000000004
-
-[node name="Sprite" type="Sprite2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3/Chunk" unique_id=2049409825]
-position = Vector2(-14, -6)
-texture = ExtResource("64_k3xff")
-centered = false
-
-[node name="Shape" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3/Chunk" unique_id=773200549]
-position = Vector2(0, 7)
-shape = SubResource("RectangleShape2D_8tdjg")
-
-[node name="Rubble" type="CPUParticles2D" parent="Rooms/Room4_Pillars/Pillars/Pillar3" unique_id=1745550861]
-z_index = 3
-position = Vector2(0, 98)
-emitting = false
-amount = 40
-texture = ExtResource("60_mtped")
-lifetime = 0.8
-one_shot = true
-explosiveness = 0.95
-emission_shape = 3
-emission_rect_extents = Vector2(12, 47)
-direction = Vector2(0, -1)
-spread = 75.0
-gravity = Vector2(0, 320)
-initial_velocity_min = 30.0
-initial_velocity_max = 95.0
-
-[node name="Pillar4" type="Node2D" parent="Rooms/Room4_Pillars/Pillars" unique_id=725675714]
-position = Vector2(2972, -384)
-script = ExtResource("56_vay0h")
-
-[node name="Sprite" type="AnimatedSprite2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4" unique_id=196174400]
-position = Vector2(-16, 0)
-sprite_frames = SubResource("SpriteFrames_64scp")
-animation = &"intact"
-autoplay = "intact"
-centered = false
-
-[node name="Body" type="StaticBody2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4" unique_id=1907970137]
-
-[node name="Intact" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4/Body" unique_id=1433539105]
-position = Vector2(0, 96)
-shape = SubResource("RectangleShape2D_3bvib")
-
-[node name="TopStump" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4/Body" unique_id=1045928447]
-position = Vector2(0, 11.5)
-shape = SubResource("RectangleShape2D_t3i82")
-
-[node name="BottomStump" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4/Body" unique_id=332572345]
-position = Vector2(0, 154.5)
-shape = SubResource("RectangleShape2D_gsyvi")
-
-[node name="Chunk" type="AnimatableBody2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4" unique_id=1022471290]
-position = Vector2(0, 83)
-script = ExtResource("58_sfq6p")
-phase = 5.2
-
-[node name="Sprite" type="Sprite2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4/Chunk" unique_id=1649415480]
-position = Vector2(-14, -6)
-texture = ExtResource("66_84kwk")
-centered = false
-
-[node name="Shape" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4/Chunk" unique_id=552089294]
-position = Vector2(0, 7)
-shape = SubResource("RectangleShape2D_iifyu")
-
-[node name="Rubble" type="CPUParticles2D" parent="Rooms/Room4_Pillars/Pillars/Pillar4" unique_id=1540772274]
-z_index = 3
-position = Vector2(0, 70)
-emitting = false
-amount = 40
-texture = ExtResource("60_mtped")
-lifetime = 0.8
-one_shot = true
-explosiveness = 0.95
-emission_shape = 3
-emission_rect_extents = Vector2(12, 47)
-direction = Vector2(0, -1)
-spread = 75.0
-gravity = Vector2(0, 320)
-initial_velocity_min = 30.0
-initial_velocity_max = 95.0
-
-[node name="Vent" type="Node2D" parent="Rooms/Room4_Pillars" unique_id=2128984107]
+[node name="Vent" type="Node2D" parent="Rooms/Room4_Collapse" unique_id=2128984107]
 position = Vector2(3024, -304)
 script = ExtResource("67_tts5r")
 
-[node name="Panel" type="Sprite2D" parent="Rooms/Room4_Pillars/Vent" unique_id=395668391]
+[node name="Panel" type="Sprite2D" parent="Rooms/Room4_Collapse/Vent" unique_id=395668391]
 z_index = 12
 texture = ExtResource("68_7pevp")
 centered = false
 offset = Vector2(-1, -63)
 
-[node name="Block" type="StaticBody2D" parent="Rooms/Room4_Pillars/Vent" unique_id=1300637988]
+[node name="Block" type="StaticBody2D" parent="Rooms/Room4_Collapse/Vent" unique_id=1300637988]
 
-[node name="Shape" type="CollisionShape2D" parent="Rooms/Room4_Pillars/Vent/Block" unique_id=681245996]
+[node name="Shape" type="CollisionShape2D" parent="Rooms/Room4_Collapse/Vent/Block" unique_id=681245996]
 position = Vector2(8, -32)
 shape = SubResource("RectangleShape2D_5f6ay")
 
-[node name="DuctEntry" type="Marker2D" parent="Rooms/Room4_Pillars" unique_id=1617864150]
+[node name="DuctEntry" type="Marker2D" parent="Rooms/Room4_Collapse" unique_id=1617864150]
 position = Vector2(3044, -304)
 gizmo_extents = 8.0
 

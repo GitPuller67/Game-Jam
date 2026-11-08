@@ -29,6 +29,12 @@ walk_speed = 80.0
 [node name="Enemy" parent="." unique_id=1550252557 instance=ExtResource("6_nai1i")]
 position = Vector2(1980, -222)
 
+[node name="Enemy2" parent="." unique_id=1550252558 instance=ExtResource("6_nai1i")]
+position = Vector2(2090, -222)
+
+[node name="Enemy3" parent="." unique_id=1550252559 instance=ExtResource("6_nai1i")]
+position = Vector2(2180, -222)
+
 [node name="HUD" parent="." unique_id=1873402219 instance=ExtResource("8_nt3wn")]
 
 [node name="MainMenu" parent="." unique_id=1735520946 node_paths=PackedStringArray("hud") instance=ExtResource("9_kc3io")]

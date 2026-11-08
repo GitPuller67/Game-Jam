@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cqn55darjdvrk" path="res://characters/father/father.gd" id="1_8d7jq"]
 [ext_resource type="PackedScene" uid="uid://dcl5iwlcdw0j8" path="res://characters/baby/baby.tscn" id="2_paef7"]
 [ext_resource type="PackedScene" uid="uid://d38qf2olsigft" path="res://levels/bullet.tscn" id="2_wxjir"]
-[ext_resource type="Texture2D" uid="uid://cqycq626gqeak" path="res://assets/Temp/sprites/knight.png" id="3_paef7"]
 [ext_resource type="Texture2D" uid="uid://btvwkyqvetm5b" path="res://assets/spritesheets/player_armless.png" id="3_wxjir"]
 [ext_resource type="Script" uid="uid://dnbjivv6npecv" path="res://characters/father/arms.gd" id="4_arms"]
 [ext_resource type="Texture2D" uid="uid://c6eajovx3hxs5" path="res://assets/spritesheets/player_arm.png" id="5_arm"]
@@ -17,9 +16,17 @@ radius = 4.1231055
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xqh7c"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_paef7"]
-atlas = ExtResource("3_paef7")
-region = Rect2(64, 224, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_crouch0"]
+atlas = ExtResource("3_wxjir")
+region = Rect2(0, 153, 35, 51)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_crouch1"]
+atlas = ExtResource("3_wxjir")
+region = Rect2(35, 153, 35, 51)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_crouch2"]
+atlas = ExtResource("3_wxjir")
+region = Rect2(70, 153, 35, 51)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_apai3"]
 atlas = ExtResource("3_wxjir")
@@ -73,11 +80,17 @@ region = Rect2(70, 102, 35, 51)
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_paef7")
+"texture": SubResource("AtlasTexture_crouch0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_crouch1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_crouch2")
 }],
-"loop": 1,
+"loop": false,
 "name": &"crouch",
-"speed": 5.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,

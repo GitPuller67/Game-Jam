@@ -610,11 +610,11 @@ func room3(r: Node2D) -> void:
 	spr(p, "PlantRight", tex(GEN + "plant.png"), Vector2(2216, -228), -5)
 
 
-# ----------------------------------------------------------------- Room 4: pillars -> floating staircase -> vent
+# ----------------------------------------------------------------- Room 4: falling ceiling -> vent
 func room4(rooms: Node2D) -> void:
 	var r := Node2D.new()
-	add(rooms, r, "Room4_Pillars")
-	note(r, "ROOM 4 - Pillars\nEach column cracks, bursts and leaves a floating chunk.\nThe chunks make a staircase up to the vent duct (top right).\nRoom4_Pillars.demo_autoplay breaks them automatically.", Vector2(2392, -360))
+	add(rooms, r, "Room4_Collapse")
+	note(r, "ROOM 4 - Collapse\nChunks of ceiling keep falling in front of the vent duct (top right).\nSlow one down with the bubble and jump onto it to climb up to the vent.\nThe chunks are spawned at runtime by room4_controller.gd (demo_autoplay starts it).", Vector2(2392, -360))
 	# the calm half of the room before the columns (background props, no collision)
 	var props := Node2D.new()
 	add(r, props, "Props")
@@ -651,49 +651,6 @@ func room4(rooms: Node2D) -> void:
 	grit.color = Color(0.85, 0.85, 0.8, 0.8)
 	add(props, grit, "FallingGrit")
 
-	var holder := Node2D.new()
-	add(r, holder, "Pillars")
-	# chunk_top / top_stump_end / bottom_stump_start, in px below the ceiling
-	var data := [[167, 107, 180], [139, 79, 173], [111, 51, 145], [83, 23, 117]]   # from pillars_tall.lua
-	for k in 4:
-		var ct: float = data[k][0]
-		var te: float = data[k][1]
-		var bs: float = data[k][2]
-		var p := Node2D.new()
-		p.position = Vector2(2804 + k * 56, -384)
-		add(holder, p, "Pillar%d" % (k + 1))
-		anim_sprite(p, "Sprite", frames(tex(ART + "pillar%d_tall_sheet.png" % (k + 1)), 32, 192,
-			[["intact", [0], 1.0, false], ["break", [1, 1, 2, 2, 3, 4, 3, 4], 8.0, false], ["broken", [5], 1.0, false]]), Vector2(-16, 0), "intact")
-		var body := StaticBody2D.new()
-		add(p, body, "Body")
-		rect_shape(body, "Intact", Vector2(24, 192), Vector2(0, 96))
-		rect_shape(body, "TopStump", Vector2(24, maxf(te, 1.0)), Vector2(0, te / 2.0))
-		rect_shape(body, "BottomStump", Vector2(24, 192.0 - bs), Vector2(0, (bs + 192.0) / 2.0))
-		var chunk := AnimatableBody2D.new()
-		chunk.position = Vector2(0, ct)
-		add(p, chunk, "Chunk")
-		spr(chunk, "Sprite", tex(ART + "chunk_tall_%d.png" % (k + 1)), Vector2(-14, -6))
-		rect_shape(chunk, "Shape", Vector2(24, 14), Vector2(0, 7))
-		chunk.set_script(load("res://scripts/floating_platform.gd"))
-		chunk.set("phase", (k + 1) * 1.3)
-		var rb := CPUParticles2D.new()
-		rb.position = Vector2(0, (te + bs) / 2.0)
-		rb.emitting = false
-		rb.one_shot = true
-		rb.amount = 40
-		rb.lifetime = 0.8
-		rb.explosiveness = 0.95
-		rb.texture = tex(GEN + "pebble.png")
-		rb.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
-		rb.emission_rect_extents = Vector2(12, (bs - te) / 2.0)
-		rb.direction = Vector2(0, -1)
-		rb.spread = 75.0
-		rb.initial_velocity_min = 30.0
-		rb.initial_velocity_max = 95.0
-		rb.gravity = Vector2(0, 320)
-		rb.z_index = 3
-		add(p, rb, "Rubble")
-		p.set_script(load("res://scripts/pillar.gd"))
 	var vent := Node2D.new()
 	vent.position = Vector2(3024, -304)
 	add(r, vent, "Vent")

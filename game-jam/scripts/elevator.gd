@@ -1,6 +1,8 @@
 extends Node2D
 ## Lift in its shaft. The Car is an AnimatableBody2D, so anything standing on it rides along.
 ## floors = car floor heights (local y). Call go_to_floor(i), or leave auto_cycle on for the demo.
+## Anything it squashes dies (anything with kill(), i.e. the Father): pinned under the car's
+## floor while it comes down, or pressed into the ceiling while riding it up.
 
 signal arrived(floor_index: int)
 
@@ -21,6 +23,7 @@ var wait := 0.0
 var last_y := 0.0
 
 @onready var car: AnimatableBody2D = $Car
+@onready var car_floor: CollisionShape2D = $Car/Floor
 @onready var pulley: Node2D = $Pulley
 @onready var counterweight: Node2D = $Counterweight
 @onready var cable_car: Line2D = $CableCar
@@ -48,6 +51,7 @@ func _physics_process(delta: float) -> void:
 	if moving:
 		t = minf(t + d / travel_time, 1.0)
 		car.position.y = lerpf(from_y, floors[target], 0.5 - 0.5 * cos(PI * t))
+		_crush_check(signf(floors[target] - from_y))
 		if t >= 1.0:
 			moving = false
 			wait = wait_time
@@ -57,6 +61,24 @@ func _physics_process(delta: float) -> void:
 		if wait <= 0.0:
 			go_to_floor((target + 1) % floors.size())
 	_update_parts()
+
+
+## dir: 1 = car going down, -1 = going up. Looks just past the car's floor in that direction.
+func _crush_check(dir: float) -> void:
+	if dir == 0.0 or is_zero_approx(time_scale):   # frozen (e.g. being rewound): not pushing anything
+		return
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = car_floor.shape
+	query.transform = car_floor.global_transform.translated(Vector2(0, 2.0 * dir))
+	query.exclude = [car.get_rid()]
+	for hit in car.get_world_2d().direct_space_state.intersect_shape(query, 8):
+		var body := hit.collider as CharacterBody2D
+		if body == null or not body.has_method("kill"):
+			continue
+		# Below the car and standing on something: nowhere to go. On it and against the ceiling: same.
+		var pinned := body.is_on_floor() if dir > 0.0 else body.is_on_ceiling()
+		if pinned:
+			body.call("kill")
 
 
 func _update_parts() -> void:

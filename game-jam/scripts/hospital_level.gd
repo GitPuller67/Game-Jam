@@ -1,10 +1,10 @@
 extends Node2D
 ## The hospital level: the map (scenes/Map.tscn) played with the real Father, Baby + bubble, Enemy and HUD.
 ##  - The Father starts standing on the map's PlayerStart marker in Room 1.
-##  - Hover the bubble over the swinging lamp, the lift, a pillar, a Room 5 floater or the Room 6 clock
+##  - Hover the bubble over the swinging lamp, the lift, a falling Room 4 chunk, a Room 5 floater or the Room 6 clock
 ##    and hold controller 2's right stick left to slow it down (the baby's time power).
 ##  - Press Y with the bubble over Room 1's keypad to open the exit door.
-##  - Room 4's columns start breaking when the Father walks into Room 4.
+##  - Room 4's ceiling starts falling in when the Father walks into Room 4 (slow a chunk, jump on it).
 ##  - Touching a Room 5 floater calls take_damage(1) on the Father if he has that method.
 
 @export var slow_factor := 0.25
@@ -14,6 +14,8 @@ extends Node2D
 @export var door_code := "4719"
 ## Overrides the Father camera's zoom in this level (his scene uses 5).
 @export var camera_zoom := 3.0
+## Play the opening cutscene (the Father walks in and picks up the baby) before handing over.
+@export var play_intro := true
 ## How quickly the camera's top/bottom limits follow the room heights (higher = snappier).
 @export var camera_limit_speed := 6.0
 
@@ -23,6 +25,7 @@ extends Node2D
 # Camera clamping: the map's outer walls left/right, and per tile column the
 # top and bottom of the Solid layer (rooms sit at different heights).
 var _cam: Camera2D
+var _keypad_doctor: KeypadDoctor
 var _solid: TileMapLayer
 var _col_top := {}
 var _col_bottom := {}
@@ -32,12 +35,15 @@ var _limit_bottom := 0.0
 
 func _ready() -> void:
 	_place_father()
-	map.get_node("Rooms/Room4_Pillars").set("demo_autoplay", false)   # wait for the trigger instead
+	map.get_node("Rooms/Room4_Collapse").set("demo_autoplay", false)   # wait for the trigger instead
 	var cam := father.get_node_or_null("Camera2D") as Camera2D
 	if cam:
 		cam.zoom = Vector2.ONE * camera_zoom
 	_setup_camera_limits()
 	_setup_room1()
+	_setup_ammo_hud()
+	_add_scalpel_pickups()
+	_start_intro()
 	_add_time_targets()
 	_hook_hazards()
 	_add_room4_trigger()
@@ -131,9 +137,7 @@ func _add_time_targets() -> void:
 	var lt := _target(lift.get_node("Car"), _rect(Vector2(64, 76)), Vector2(32, -38), [lift], lift.get_node("Car"))
 	lt.add_rewind(lift, PackedStringArray(["t", "moving", "target", "from_y", "wait"]))
 	lt.add_rewind(lift.get_node("Car"), PackedStringArray(["position"]), &"")
-	# Room 4: each column and its floating chunk
-	for p in rooms.get_node("Room4_Pillars/Pillars").get_children():
-		_target(p, _rect(Vector2(28, 192)), Vector2(0, 96), [p, p.get_node("Chunk")], p)
+	# Room 4: each falling chunk of ceiling makes its own time target (FallingDebris)
 	# Room 5: every floating object
 	for f in rooms.get_node("Room5_UncannyDrop/Floaters").get_children():
 		_target(f, _circle(14), Vector2.ZERO, [f], f).add_rewind(f, PackedStringArray(["t"]))
@@ -145,9 +149,9 @@ func _add_time_targets() -> void:
 	# rewinding the clock plays the whole ward loop backwards
 	t.add_rewind(ward, PackedStringArray(), &"loop_speed", Rewinder.Mode.REVERSE)
 	# the enemy can be slowed, sped up and rewound too
-	var enemy := get_node_or_null("Enemy") as Node2D
-	if enemy:
-		_enemy_time_target(enemy)
+	for child in get_children():
+		if child is Enemy:
+			_enemy_time_target(child)
 
 
 func _enemy_time_target(enemy: Node2D) -> void:
@@ -191,7 +195,7 @@ func _on_hazard_touched(body: Node, area: Area2D) -> void:
 
 
 func _add_room4_trigger() -> void:
-	var room4 := map.get_node("Rooms/Room4_Pillars")
+	var room4 := map.get_node("Rooms/Room4_Collapse")
 	var trig := Area2D.new()
 	trig.name = "Room4Trigger"
 	trig.position = Vector2(2420, -224)
@@ -203,7 +207,7 @@ func _add_room4_trigger() -> void:
 	add_child(trig)
 	trig.body_entered.connect(func(body: Node) -> void:
 		if body == father:
-			room4.call("start_breaking")
+			room4.call("start_collapse")
 			trig.queue_free())
 
 
@@ -238,7 +242,9 @@ func _setup_room1() -> void:
 	doctor.code = door_code
 	doctor.keypad = keypad
 	doctor.door = exit_door
+	doctor.wait_for_begin = play_intro   # his scene follows the intro
 	r1.add_child(doctor)
+	_keypad_doctor = doctor
 	# once he's after the Father he's a normal enemy: slow / speed up / rewind him like the others
 	doctor.turned_hostile.connect(_enemy_time_target)
 	# the keypad screen (type the code backwards)
@@ -263,6 +269,73 @@ func _setup_room1() -> void:
 		keypad.play("unlocked")
 		doctor.turn_hostile()   # the door opening gives the Father away
 		exit_door.call("open"))
+
+
+## The opening: the Father walks in and picks up the baby, then the keypad doctor's scene starts.
+func _start_intro() -> void:
+	if not play_intro:
+		return
+	var intro := IntroCutscene.new()
+	intro.name = "Intro"
+	intro.father = father as Father
+	intro.crib = map.get_node("Rooms/Room1_FindingBaby/BabyPod/BabyCrib") as Sprite2D
+	intro.finished.connect(_keypad_doctor.begin)
+	add_child(intro)
+
+
+# --- Scalpels: pickups, HUD count + pickup popup ---
+## Scalpels left on the floor (feet positions), 5 each. The Father starts with none.
+## 30 in all: each shielded enemy takes 3 (a sped-up one for the shield, then 2), and there are 4
+## (the keypad doctor + Room 3's three), so there's plenty to spare for misses.
+const SCALPEL_PICKUPS: Array[Vector2] = [
+	Vector2(750, 0),        # Room 1, just before the keypad door
+	Vector2(960, 0),        # Room 2, where the keypad doctor waits
+	Vector2(1440, 0),       # Room 2, before the lift
+	Vector2(1640, -192),    # Room 3, on the way in
+	Vector2(2035, -192),    # Room 3, between the guards
+	Vector2(2300, -192),    # corridor 3 -> 4
+]
+
+
+func _add_scalpel_pickups() -> void:
+	var holder := Node2D.new()
+	holder.name = "ScalpelPickups"
+	add_child(holder)
+	for i in SCALPEL_PICKUPS.size():
+		var pickup := ScalpelPickup.new()
+		pickup.name = "ScalpelPickup%d" % (i + 1)
+		pickup.position = SCALPEL_PICKUPS[i]
+		pickup.picked_up.connect(_show_pickup_popup)
+		holder.add_child(pickup)
+
+
+func _setup_ammo_hud() -> void:
+	if father.has_signal("ammo_changed"):
+		father.connect("ammo_changed", _on_ammo_changed)
+	_on_ammo_changed(int(father.get("current_ammo")))
+
+
+## The Shoot prompt only shows once he has scalpels, with how many are left.
+func _on_ammo_changed(ammo: int) -> void:
+	var prompt := get_node_or_null("HUD/BottomBar/Controls/ShootPrompt") as Control
+	if prompt:
+		prompt.visible = ammo > 0
+		(prompt.get_node("Row/Label") as Label).text = "Shoot  x%d" % ammo
+
+
+func _show_pickup_popup(amount: int) -> void:
+	var popup := get_node_or_null("HUD/WeaponPopup") as Control
+	if popup == null:
+		return
+	(popup.get_node("Row/Text/Title") as Label).text = "Picked up"
+	(popup.get_node("Row/Text/WeaponName") as Label).text = "Scalpels x%d" % amount
+	(popup.get_node("Row/Glyph") as Control).visible = false
+	popup.modulate.a = 1.0
+	popup.visible = true
+	var tw := popup.create_tween()
+	tw.tween_interval(2.0)
+	tw.tween_property(popup, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(popup.hide)
 
 
 # --- Health bar + respawning ---

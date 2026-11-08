@@ -39,6 +39,8 @@ enum State { WAITING, PLAYING, HOSTILE }
 ## so the player sees him do it.
 @export var start_delay := 0.8
 @export var start_distance := 260.0
+## Hold him by the pod until begin() is called (the level does this when the intro ends).
+@export var wait_for_begin := false
 
 const DIGIT_TINT := Color(0.6, 1.2, 0.9, 1.0)
 const SLOW_TINT := Color(0.7, 0.85, 1.25)
@@ -59,6 +61,7 @@ var _lcd: Texture2D
 var _digits: Array[Sprite2D] = []    # the code as it's revealed by a rewind, left to right
 var _floor_y := 0.0
 var _seen_for := 0.0
+var _begun := false
 var _door_x := 0.0
 # timeline
 var _walk_in := Vector2.ZERO     # start, end time of the walk to the keypad
@@ -127,6 +130,8 @@ func _physics_process(delta: float) -> void:
 		turn_hostile()
 		return
 	if state == State.WAITING:
+		if wait_for_begin and not _begun:
+			return
 		if _on_screen() or (is_instance_valid(_father) and _father.global_position.distance_to(doctor.global_position) < start_distance):
 			_seen_for += delta
 		if _seen_for < start_delay:
@@ -138,6 +143,11 @@ func _physics_process(delta: float) -> void:
 	t = new_t
 	doctor.animated_sprite.speed_scale = rate
 	_apply()
+
+
+## Lets him set off (see wait_for_begin); he still waits until he's been on screen start_delay.
+func begin() -> void:
+	_begun = true
 
 
 func _on_screen() -> bool:

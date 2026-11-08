@@ -7,6 +7,8 @@ signal health_changed(new_health: int, max_health: int)
 signal died
 signal state_changed(new_state: State)
 signal shot
+## His scalpel count changed (picked some up, or threw one).
+signal ammo_changed(ammo: int)
 
 
 # --- Enums ---
@@ -96,7 +98,14 @@ var _soothe_t: float = 0.0
 
 # Ammo
 @export var max_ammo: int = 10
+## He starts empty-handed: scalpels come from pickups (ScalpelPickup).
 var current_ammo: int = 0
+
+## Set by cutscenes (e.g. the intro): the player's input is ignored, he walks in cutscene_walk's
+## direction (-1 / 0 / 1, fractions walk slower) and crouches while cutscene_crouch is on.
+var cutscene: bool = false
+var cutscene_walk: float = 0.0
+var cutscene_crouch: bool = false
 
 # Aim
 @export_group("Aiming")
@@ -108,7 +117,10 @@ var current_aim_angle: float = 0.0
 var is_using_controller: bool = false
 
 func _ready() -> void:
-	current_ammo = max_ammo
+	current_ammo = 0
+	# Jumping off something that's sinking (a slowed Room 4 chunk, the lift going down) still gets a
+	# full-height jump; a rising platform still adds its lift.
+	platform_on_leave = CharacterBody2D.PLATFORM_ON_LEAVE_ADD_UPWARD_VELOCITY
 	add_to_group("door_blockable")   # timed doors (Room 6) shove him back if they shut on him
 	_add_time_handle()
 	_add_soothe_hearts()
@@ -132,6 +144,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		is_using_controller = true
 
 func _process(delta: float) -> void:
+	if cutscene:
+		# no aiming or shooting; he faces the way he walks
+		if cutscene_walk != 0.0:
+			facing_direction = 1 if cutscene_walk > 0.0 else -1
+			animated_sprite.flip_h = facing_direction < 0
+		return
 	# Checked once per frame so one RT pull / click fires exactly one bullet.
 	if Input.is_action_just_pressed("shoot"):
 		shoot()
@@ -166,6 +184,7 @@ func shoot() -> void:
 		return
 		
 	current_ammo -= 1
+	ammo_changed.emit(current_ammo)
 	
 	var new_bullet = bullet_scene.instantiate()
 	new_bullet.global_position = muzzle.global_position
@@ -200,6 +219,24 @@ func take_damage(amount: int = 1, source_position: Vector2 = Vector2.INF) -> voi
 	await get_tree().create_timer(invincible_time, false).timeout
 	visuals.modulate.a = 1.0
 	is_invincible = false
+
+
+## Picks up scalpels (up to max_ammo). Returns how many he actually took.
+func add_ammo(amount: int) -> int:
+	var before := current_ammo
+	current_ammo = mini(current_ammo + amount, max_ammo)
+	if current_ammo != before:
+		ammo_changed.emit(current_ammo)
+	return current_ammo - before
+
+
+## Instant death (e.g. crushed by the lift), even during his post-hit invincibility.
+func kill() -> void:
+	if current_state == State.DEAD:
+		return
+	health = 0
+	health_changed.emit(health, max_health)
+	_die()
 
 
 func _die() -> void:
@@ -263,7 +300,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	# Soothing the baby: stand still, rock the baby, energy refills.
-	_set_soothing(Input.is_action_pressed("soothe") and is_on_floor() and not is_sliding, real_delta)
+	_set_soothing(Input.is_action_pressed("soothe") and is_on_floor() and not is_sliding and not cutscene, real_delta)
 	if is_soothing:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		animated_sprite.play("default")
@@ -272,7 +309,7 @@ func _physics_process(delta: float) -> void:
 		
 	# Handle crouch.			
 	if velocity.x != 0:
-		if Input.is_action_just_pressed("crouch") and not is_sliding and can_slide:
+		if Input.is_action_just_pressed("crouch") and not is_sliding and can_slide and not cutscene:
 			is_sliding = true
 			animated_sprite.play("slide")
 			speed = slide_speed
@@ -286,12 +323,12 @@ func _physics_process(delta: float) -> void:
 	else:
 		time_since_floor += delta
 
-	if Input.is_action_just_pressed("jump") and can_jump():
+	if Input.is_action_just_pressed("jump") and can_jump() and not cutscene:
 		velocity.y = jump_velocity
 		has_jumped = true
 
 	# Get the input direction: -1, 0, 1
-	var direction := Input.get_axis("move_left", "move_right")
+	var direction := cutscene_walk if cutscene else Input.get_axis("move_left", "move_right")
 
 	# Facing follows the aim, not movement (see _face_aim).
 
@@ -300,7 +337,7 @@ func _physics_process(delta: float) -> void:
 		pass
 	elif is_on_floor():
 		if direction == 0:
-			if is_crouching:
+			if is_crouching or (cutscene and cutscene_crouch):
 				animated_sprite.play("crouch")
 			else:
 				animated_sprite.play("default")
