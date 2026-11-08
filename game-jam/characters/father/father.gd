@@ -65,6 +65,18 @@ var is_crouching: bool = false
 # Bullet
 @export var bullet_scene: PackedScene
 @onready var muzzle: Marker2D = $Muzzle
+@onready var aim_laser: Line2D = $"Muzzle/Aim Laser"
+
+# Ammo
+@export var max_ammo: int = 10
+var current_ammo: int = 0
+
+# Aim
+var current_aim_angle: float = 0.0
+var is_using_controller: bool = false
+
+func _ready() -> void:
+	current_ammo = max_ammo
 
 func _on_slide_timer_timeout() -> void:
 	is_sliding = false
@@ -78,19 +90,35 @@ func _on_slide_cooldown_timer_timeout() -> void:
 
 # Bullet logic
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventJoypadMotion or event is InputEventJoypadButton:
+		is_using_controller = true
+	
 	if Input.is_action_just_pressed("shoot"):
 		shoot()
 		
+func _process(delta: float) -> void:
+	if is_using_controller:
+		var aim_vector = Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
+		
+		if aim_vector.length() > 0.2:
+			current_aim_angle = aim_vector.angle()
+	else:
+		var mouse_pos = get_global_mouse_position()
+		current_aim_angle = muzzle.global_position.direction_to(mouse_pos).angle()
+		
+	aim_laser.global_rotation = current_aim_angle	
+		
 func shoot() -> void:
+	if current_ammo <= 0:
+		return
+		
+	current_ammo -= 1
+	
 	var new_bullet = bullet_scene.instantiate()
 	new_bullet.global_position = muzzle.global_position
 	
-	var aim_vector = Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
-	if aim_vector.length() > 0.1:
-		new_bullet.global_rotation = aim_vector.angle()
-	else:
-		var mouse_position = get_global_mouse_position()
-		new_bullet.look_at(mouse_position)
+	new_bullet.global_position = muzzle.global_position
+	new_bullet.global_rotation = current_aim_angle
 	
 	get_tree().current_scene.add_child(new_bullet)
 
