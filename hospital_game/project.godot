@@ -1,0 +1,41 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Hospital Time - Map"
+config/description="Level map: rooms 1-6. Player controllers plug in separately."
+run/main_scene="res://scenes/Map.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=480
+window/size/viewport_height=270
+window/size/window_width_override=1440
+window/size/window_height_override=810
+window/stretch/mode="canvas_items"
+
+[dotnet]
+
+project/assembly_name="Hospital Time - Map"
+
+[layer_names]
+
+2d_physics/layer_1="world"
+2d_physics/layer_2="hazard"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.055, 0.06, 0.1, 1)
+2d/snap/snap_2d_transforms_to_pixel=true
