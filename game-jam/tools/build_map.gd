@@ -21,10 +21,10 @@ const RECTS := [
 	[140, -16, 148, -13],                     # corridor 3 -> 4
 	[149, -24, 188, -13],                     # Room 4 (12 tiles high)
 	[189, -23, 201, -20],                     # vent duct 4 -> 5 (64 high, character is 51)
-	[202, -23, 229, 9],                       # Room 5 (drop)
-	[230, 5, 230, 9], [231, 0, 236, 9], [237, 0, 237, 3],   # stairs up to Room 6
-	[238, -2, 257, 3],                        # Room 6 (6 tiles high, 20 wide: clock + door both on screen)
-	[258, 0, 261, 3],                         # Room 6 exit door + nook (64 high)
+	[202, -23, 213, 40],                      # Room 5 (narrow, deep drop)
+	[214, 36, 214, 40], [215, 31, 220, 40], [221, 31, 221, 34],   # stairs up to Room 6
+	[222, 29, 241, 34],                       # Room 6 (6 tiles high, 20 wide: clock + door both on screen)
+	[242, 31, 245, 34],                       # Room 6 exit door + nook (64 high)
 ]
 
 var ts: TileSet
@@ -252,11 +252,11 @@ func carve() -> void:
 	for c in forced:
 		interior.erase(c)
 	# staircase between Room 5 and Room 6: slope tiles with solid beneath
-	for col in range(231, 237):
-		var sr := 9 - (col - 231)
+	for col in range(215, 221):
+		var sr := 40 - (col - 215)
 		interior.erase(Vector2i(col, sr))
 		slopes[Vector2i(col, sr)] = true
-		for row in range(sr + 1, 10):
+		for row in range(sr + 1, 41):
 			interior.erase(Vector2i(col, row))
 
 
@@ -281,9 +281,9 @@ func region(c: Vector2i) -> String:
 		return "brick" if c.y <= -23 else "shaft"
 	if x >= 189 and x <= 201 and c.y >= -23 and c.y <= -20:
 		return "duct"
-	if x >= 202 and x <= 229:
+	if x >= 202 and x <= 213:
 		return "uncanny"
-	if x >= 230 and x <= 237:
+	if x >= 214 and x <= 221:
 		return "concrete"
 	return "ward"
 
@@ -327,7 +327,7 @@ func bg_tile(c: Vector2i) -> Vector2i:
 
 func paint_tiles() -> void:
 	var lo := Vector2i(-4, -31)
-	var hi := Vector2i(286, 14)
+	var hi := Vector2i(286, 46)
 	for y in range(lo.y, hi.y + 1):
 		for x in range(lo.x, hi.x + 1):
 			var c := Vector2i(x, y)
@@ -383,9 +383,9 @@ func paint_decor() -> void:
 	# corridor + Room 4
 	deco(144, -16, "lamp"); deco(154, -24, "lamp"); deco(170, -24, "lamp"); deco(162, -16, "poster"); deco(166, -16, "switch"); deco(157, -17, "red_cross")
 	# Room 6 ward
-	window(241, -2); deco(246, -1, "gas"); deco(247, -1, "call"); deco(252, -2, "vent")
-	deco(257, -1, "sanitizer")
-	deco(244, -2, "tv_l"); deco(245, -2, "tv_r")
+	window(225, 29); deco(230, 30, "gas"); deco(231, 30, "call"); deco(236, 29, "vent")
+	deco(241, 30, "sanitizer")
+	deco(228, 29, "tv_l"); deco(229, 29, "tv_r")
 
 
 # ----------------------------------------------------------------- map
@@ -415,7 +415,7 @@ func build_map() -> void:
 
 	var anchors := Node2D.new()
 	add(root, anchors, "RoomAnchors")
-	var centers := [Vector2(384, -136), Vector2(1180, -56), Vector2(1920, -240), Vector2(2704, -288), Vector2(3456, -72), Vector2(3968, 16)]
+	var centers := [Vector2(384, -136), Vector2(1180, -56), Vector2(1920, -240), Vector2(2704, -288), Vector2(3328, 144), Vector2(3712, 512)]
 	for i in centers.size():
 		marker(anchors, "Room%d" % (i + 1), centers[i])
 
@@ -681,71 +681,113 @@ func floater(parent: Node, n: String, texture: Texture2D, pos: Vector2, spin: fl
 
 
 func room5(rooms: Node2D) -> void:
+	# A narrow, deep shaft. Rows of floating hospital junk block it, each with ONE gap, and the gaps
+	# zig-zag left and right. At normal speed you fall too fast to steer from one gap to the next;
+	# with the baby slowing Dad down (his fall slows, his steering doesn't - see hospital_level.gd)
+	# there's time to weave through.
 	var r := Node2D.new()
 	add(rooms, r, "Room5_UncannyDrop")
-	note(r, "ROOM 5 - The drop\nOut of the duct (top left) and fall. Hospital things hang in the air,\ndrifting, spinning and glitching. Each has a Hazard area (group 'hazard').\nExit: stairs bottom right.", Vector2(3240, -268))
+	note(r, "ROOM 5 - The drop\nA long fall down a narrow shaft. Rows of floating junk, one gap each,\nzig-zagging. Slow Dad down to steer through. Exit: stairs bottom right.", Vector2(3236, -360))
 	marker(r, "FallStart", Vector2(3250, -272))
-	marker(r, "Exit", Vector2(3700, 150))
+	marker(r, "Exit", Vector2(3416, 630))
 	var fl := Node2D.new()
 	add(r, fl, "Floaters")
 	var icons := tex(ART + "item_icons_16x16.png")
 	var bed := tex(GEN + "bed_side.png")
-	var list := [
-		["CribWhite", tex(ART + "baby_crib_white.png"), Vector2(3300, -190), 0.0, 22.0],
-		["CribOak", tex(ART + "baby_crib_oak.png"), Vector2(3560, -150), 7.0, 10.0],
-		["CribWalnut", tex(ART + "baby_crib_walnut.png"), Vector2(3420, 70), -5.0, 14.0],
-		["Bed", atlas(bed, Rect2(0, 0, 64, 32)), Vector2(3490, -40), 0.0, 16.0],
-		["Wheelchair", tex(GEN + "wheelchair.png"), Vector2(3280, 110), 22.0, 0.0],
-		["Wheelchair2", tex(GEN + "wheelchair.png"), Vector2(3630, 40), -14.0, 0.0],
-		["IVStand", tex(GEN + "iv_stand.png"), Vector2(3450, -235), 0.0, 35.0],
-		["IVStand2", tex(GEN + "iv_stand.png"), Vector2(3655, 115), 48.0, 0.0],
-		["Chair", tex(GEN + "chair.png"), Vector2(3360, -100), 60.0, 0.0],
-		["Chair2", tex(GEN + "chair.png"), Vector2(3585, 105), -40.0, 0.0],
-		["Monitor", tex(GEN + "heart_monitor.png"), Vector2(3530, -255), 0.0, 9.0],
-		["Tray", tex(GEN + "tray_full.png"), Vector2(3300, -55), 90.0, 0.0],
-		["Stethoscope", tex(GEN + "stethoscope.png"), Vector2(3430, 135), -70.0, 0.0],
-		["Teddy", tex(GEN + "teddy.png"), Vector2(3385, -268), 30.0, 0.0],
-		["Bottle", atlas(icons, Rect2(0, 0, 16, 16)), Vector2(3505, 15), 120.0, 0.0],
-		["Syringe", atlas(icons, Rect2(16, 0, 16, 16)), Vector2(3565, -85), -150.0, 0.0],
-		["Plaster", atlas(icons, Rect2(32, 0, 16, 16)), Vector2(3325, 70), 80.0, 0.0],
-		["Pills", atlas(icons, Rect2(48, 0, 16, 16)), Vector2(3645, -120), 110.0, 0.0],
-		["Scalpel", tex(ART + "scalpel_icon_16.png"), Vector2(3465, -130), 300.0, 0.0],
-		["Crate", tex(GEN + "crate.png"), Vector2(3610, -20), 12.0, 0.0],
-		["Apple", tex(GEN + "apple.png"), Vector2(3395, 10), 200.0, 0.0],
-		["Cup", tex(GEN + "cup.png"), Vector2(3540, 140), -95.0, 0.0],
+	# blockers that make up a row (wide-ish hazard boxes so there are no gaps between them)
+	var kinds := [
+		["Crate", tex(GEN + "crate.png")],
+		["Wheelchair", tex(GEN + "wheelchair.png")],
+		["Monitor", tex(GEN + "heart_monitor.png")],
+		["Bottle", atlas(icons, Rect2(0, 0, 16, 16))],
+		["Chair", tex(GEN + "chair.png")],
+		["Stethoscope", tex(GEN + "stethoscope.png")],
+		["Pills", atlas(icons, Rect2(48, 0, 16, 16))],
+		["Tray", tex(GEN + "tray_full.png")],
+		["Teddy", tex(GEN + "teddy.png")],
 	]
-	for it in list:
-		floater(fl, it[0], it[1], it[2], it[3], it[4])
-	var holder := floater(fl, "FloatingClock", tex(GEN + "clock64_face.png"), Vector2(3610, -250), 4.0, 0.0)
+	# [row height y, gap centre x] - the gap is GAP px wide; the shaft is x 3232..3424
+	var rows := [[-190.0, 3285.0], [-50.0, 3355.0], [90.0, 3280.0], [230.0, 3350.0], [370.0, 3275.0], [510.0, 3345.0]]
+	const GAP := 60.0
+	const STEP := 26.0
+	var k := 0
+	for ri in rows.size():
+		var y: float = rows[ri][0]
+		var gx: float = rows[ri][1]
+		var segs := [[3232.0 + 8.0, gx - GAP / 2.0], [gx + GAP / 2.0, 3424.0 - 8.0]]
+		for seg in segs:
+			var a: float = seg[0]
+			var b: float = seg[1]
+			if b - a < 8.0:
+				continue
+			# a flickering time-glitch beam links the junk in a row, so the one gap is easy to read
+			var beam := Line2D.new()
+			beam.points = PackedVector2Array([Vector2(a - 4.0, y), Vector2(b + 4.0, y)])
+			beam.width = 5.0
+			beam.default_color = Color(0.78, 0.5, 1.0, 0.5)
+			beam.z_index = -1
+			add(fl, beam, "Beam_r%d_%d" % [ri, int(a)])
+			var core := Line2D.new()
+			core.points = beam.points
+			core.width = 1.0
+			core.default_color = Color(1.0, 0.85, 1.0, 0.8)
+			core.z_index = -1
+			add(beam, core, "Core")
+			beam.set_script(load("res://scripts/pulse.gd"))
+			beam.set("min_alpha", 0.45)
+			beam.set("max_alpha", 1.0)
+			beam.set("period", 0.9)
+			var n := maxi(1, int(ceil((b - a) / STEP)))
+			var w := (b - a) / n                # each blocker exactly fills its slot: no holes, nothing pokes into the gap
+			for i in n:
+				var x := a + w * (i + 0.5)
+				var kind: Array = kinds[k % kinds.size()]
+				k += 1
+				var f := floater(fl, "%s_r%d_%d" % [kind[0], ri, i], kind[1], Vector2(x, y + (i % 2) * 6.0 - 3.0), 0.0, 5.0, Vector2(2, 3))
+				var sz: Vector2 = kind[1].get_size()
+				var hz := f.get_node("Hazard/Shape") as CollisionShape2D
+				(hz.shape as RectangleShape2D).size = Vector2(w, 16.0)   # thin rows: the space between them is for steering
+	# small free floaters tucked against the walls between rows, away from the path (scenery, still hazards)
+	var free := [
+		["Scalpel", tex(ART + "scalpel_icon_16.png"), Vector2(3414, -120), 260.0, 0.0],
+		["Syringe", atlas(icons, Rect2(16, 0, 16, 16)), Vector2(3242, 20), -150.0, 0.0],
+		["Apple", tex(GEN + "apple.png"), Vector2(3414, 160), 200.0, 0.0],
+		["Cup", tex(GEN + "cup.png"), Vector2(3242, 300), -95.0, 0.0],
+		["Plaster", atlas(icons, Rect2(32, 0, 16, 16)), Vector2(3414, 440), 80.0, 0.0],
+	]
+	for it in free:
+		floater(fl, it[0], it[1], it[2], it[3], it[4], Vector2(1, 3))
+	var holder := floater(fl, "FloatingClock", tex(GEN + "clock64_face.png"), Vector2(3392, -330), 4.0, 0.0, Vector2(2, 3))
 	clock(holder, "Hands", 64, Vector2.ZERO, Vector3(-200, -40, -6), 1.2)
 	# things stuck where they shouldn't be
 	var wrong := Node2D.new()
 	add(r, wrong, "WrongThings")
-	var up := clock(wrong, "CeilingClock", 32, Vector2(3560, -288), Vector3(-90, -15, -2), 0.5)
+	var up := clock(wrong, "CeilingClock", 32, Vector2(3300, -352), Vector3(-90, -15, -2), 0.5)
 	up.rotation_degrees = 180.0
-	spr(wrong, "CeilingIVStand", tex(GEN + "iv_stand.png"), Vector2(3400, -280), -1, true).rotation_degrees = 180.0
-	spr(wrong, "WallWheelchair", tex(GEN + "wheelchair.png"), Vector2(3664, -60), -1, true).rotation_degrees = -90.0
-	spr(wrong, "CeilingChair", tex(GEN + "chair.png"), Vector2(3300, -292), -1, true).rotation_degrees = 180.0
+	spr(wrong, "WallWheelchair", tex(GEN + "wheelchair.png"), Vector2(3240, 230), -1, true).rotation_degrees = 90.0
+	spr(wrong, "WallChair", tex(GEN + "chair.png"), Vector2(3418, 470), -1, true).rotation_degrees = -90.0
 	# atmosphere
+	var top := -368.0
+	var h := 1040.0
 	var tint := ColorRect.new()
-	tint.position = Vector2(3232, -368)
-	tint.size = Vector2(448, 528)
+	tint.position = Vector2(3232, top)
+	tint.size = Vector2(192, h)
 	tint.color = Color(0.78, 0.66, 0.92)
 	var mat := CanvasItemMaterial.new(); mat.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
 	tint.material = mat
 	tint.z_index = 30
 	tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add(r, tint, "Tint")
-	var vig := spr(r, "Vignette", radial(128, Color(0, 0, 0, 0), Color(0.03, 0.0, 0.06, 0.75)), Vector2(3456, -104), 31, true)
-	vig.scale = Vector2(448.0 / 128.0 * 1.25, 528.0 / 128.0 * 1.25)
+	var vig := spr(r, "Vignette", radial(128, Color(0, 0, 0, 0), Color(0.03, 0.0, 0.06, 0.75)), Vector2(3328, top + h / 2.0), 31, true)
+	vig.scale = Vector2(192.0 / 128.0 * 1.35, h / 128.0 * 1.1)
 	var dust := CPUParticles2D.new()
-	dust.position = Vector2(3456, -72)
-	dust.amount = 80
+	dust.position = Vector2(3328, top + h / 2.0)
+	dust.amount = 120
 	dust.lifetime = 8.0
 	dust.preprocess = 8.0
 	dust.texture = tex(GEN + "mote.png")
 	dust.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
-	dust.emission_rect_extents = Vector2(224, 232)
+	dust.emission_rect_extents = Vector2(96, h / 2.0)
 	dust.direction = Vector2(0, -1)
 	dust.spread = 30.0
 	dust.initial_velocity_min = 2.0
@@ -756,9 +798,10 @@ func room5(rooms: Node2D) -> void:
 	add(r, dust, "Dust")
 	var lights := Node2D.new()
 	add(r, lights, "Lights")
-	light(lights, "SickLight1", Vector2(3300, -200), 220, Color(0.6, 1.0, 0.7), 0.7)
-	light(lights, "SickLight2", Vector2(3580, -10), 260, Color(0.75, 0.6, 1.0), 0.7)
-	light(lights, "SickLight3", Vector2(3420, 120), 200, Color(0.6, 1.0, 0.7), 0.7)
+	light(lights, "SickLight1", Vector2(3280, -220), 220, Color(0.6, 1.0, 0.7), 0.7)
+	light(lights, "SickLight2", Vector2(3380, 60), 240, Color(0.75, 0.6, 1.0), 0.7)
+	light(lights, "SickLight3", Vector2(3290, 330), 220, Color(0.6, 1.0, 0.7), 0.7)
+	light(lights, "SickLight4", Vector2(3370, 580), 220, Color(0.75, 0.6, 1.0), 0.7)
 	r.set_script(load("res://scripts/uncanny_room.gd"))
 
 
@@ -775,6 +818,7 @@ func key(a: Animation, path: String, keys: Array, discrete := false) -> void:
 func room6(rooms: Node2D) -> void:
 	var r := Node2D.new()
 	add(rooms, r, "Room6_TimeLoopWard")
+	r.position = Vector2(-256, 496)   # the ward was moved to sit below the longer Room 5 drop; contents keep their old coordinates
 	note(r, "ROOM 6 - Ward stuck in a seamless 10-second loop\nBed rolls out and back, curtain opens and closes, nurse drops her tray\nand it floats back; exit door is open only from 7.05s to 7.15s. LoopPlayer drives it all;\nRoom6.loop_speed changes the speed of the whole room.", Vector2(3816, -28))
 	marker(r, "LoopClock", Vector2(3990, -8))
 	var glow := spr(r, "ClockGlow", radial(56, Color(1, 0.9, 0.4, 0.7), Color(1, 0.9, 0.4, 0)), Vector2(3990, -8), -1, true)
@@ -1009,11 +1053,11 @@ func lighting(root: Node) -> void:
 	shade(r4, "DuctShade", Rect2(3024, -368, 208, 64), dark[0], dark[1], dark[2])
 
 	var st := Node2D.new(); add(L, st, "Stairs5to6")
-	shade(st, "Shade", Rect2(3680, 0, 128, 160), dark[0], dark[1], dark[2])
-	cone_light(st, "Light", Vector2(3744, 0), 160, 120, warm, 0.28)
+	shade(st, "Shade", Rect2(3424, 496, 128, 160), dark[0], dark[1], dark[2])
+	cone_light(st, "Light", Vector2(3488, 496), 160, 120, warm, 0.28)
 
 	var r6 := Node2D.new(); add(L, r6, "Room6")
-	shade(r6, "Shade", Rect2(3808, -32, 384, 96), dusk[0], dusk[1], dusk[2])
-	strip_light(r6, "CeilingLight1", Vector2(3890, -32), warm, 0.32, 100)
-	strip_light(r6, "CeilingLight2", Vector2(4060, -32), warm, 0.32, 100)
-	window_shaft(r6, "WindowLight", Rect2(3856, -32, 32, 32), 64.0, Color(1.0, 0.78, 0.55), 0.55, 0.2)
+	shade(r6, "Shade", Rect2(3552, 464, 384, 96), dusk[0], dusk[1], dusk[2])
+	strip_light(r6, "CeilingLight1", Vector2(3634, 464), warm, 0.32, 100)
+	strip_light(r6, "CeilingLight2", Vector2(3804, 464), warm, 0.32, 100)
+	window_shaft(r6, "WindowLight", Rect2(3600, 464, 32, 32), 560.0, Color(1.0, 0.78, 0.55), 0.55, 0.2)
