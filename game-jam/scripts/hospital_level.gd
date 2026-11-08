@@ -42,6 +42,7 @@ func _ready() -> void:
 	_add_room4_trigger()
 	_setup_health()
 	_setup_energy()
+	_add_soothe_prompt()
 
 
 func _process(delta: float) -> void:
@@ -232,6 +233,9 @@ func _setup_room1() -> void:
 	add_child(ui)
 	var btn := BubbleButton.new()
 	btn.one_shot = false
+	btn.rewindable = true   # hold Y on the keypad to see the echo typing the code
+	btn.rewind_started.connect(replay.play_replay)
+	btn.rewind_stopped.connect(replay.hide_replay)
 	btn.name = "KeypadButton"
 	btn.position = keypad.position + Vector2(5, 7)
 	var bcs := CollisionShape2D.new()
@@ -242,10 +246,11 @@ func _setup_room1() -> void:
 	r1.add_child(btn)
 	btn.pressed.connect(func() -> void:
 		if not exit_door.get("is_open"):
-			ui.open())
+			ui.open.call_deferred())   # deferred: don't pause the game in the middle of input handling
 	ui.solved.connect(func() -> void:
 		keypad.play("unlocked")
 		replay.stop()
+		btn.rewindable = false
 		exit_door.call("open"))
 
 
@@ -303,3 +308,21 @@ func _on_father_died() -> void:
 	if body and body.shape:
 		feet = (body.transform * body.shape.get_rect()).end.y
 	father.call("respawn", _checkpoint - Vector2(0, feet + 1))
+
+
+## Adds a "Soothe [X]" prompt to the HUD next to Jump / Slide / Crouch.
+func _add_soothe_prompt() -> void:
+	var jump := get_node_or_null("HUD/BottomBar/Controls/BasicControls/JumpPrompt") as Control
+	if jump == null:
+		return
+	var p := jump.duplicate() as Control
+	p.name = "SoothePrompt"
+	(p.get_node("Row/Label") as Label).text = "Soothe"
+	(p.get_node("Row/Glyph/Label") as Label).text = "X"
+	var glyph := p.get_node("Row/Glyph") as PanelContainer
+	var style := glyph.get_theme_stylebox("panel")
+	if style is StyleBoxFlat:
+		var blue := (style as StyleBoxFlat).duplicate() as StyleBoxFlat
+		blue.bg_color = Color(0.2, 0.45, 0.9)
+		glyph.add_theme_stylebox_override("panel", blue)
+	jump.get_parent().add_child(p)

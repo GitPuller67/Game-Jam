@@ -4,7 +4,7 @@ extends CanvasLayer
 ## (the ghost replay in the room shows it being typed forwards).
 ## Navigate with the d-pad / left stick (either controller), press with A, controller 2's Y or a
 ## mouse click. * clears, # submits (it also checks automatically after the last digit).
-## B / Esc closes it. The game is paused while it's open.
+## The EXIT button (or B / Esc) closes it. The game is paused while it's open.
 
 signal solved
 signal closed
@@ -19,7 +19,9 @@ const KEY_ORIGIN := Vector2(14, 51)
 const KEY_STEP := Vector2(30, 24)
 const LCD_ORIGIN := Vector2(30, 16)
 const LCD_STEP := 14.0
-const PANEL_SIZE := Vector2(112, 156)
+const PANEL_SIZE := Vector2(112, 172)
+const EXIT_POS := Vector2(34, 152)
+const EXIT_SIZE := Vector2(44, 14)
 
 var entry := ""
 var is_open := false
@@ -88,6 +90,19 @@ func _build() -> void:
 		b.mouse_entered.connect(b.grab_focus)
 		_panel.add_child(b)
 		_buttons[k] = b
+
+	var exit_tex: Texture2D = load(GEN + "keypad_ui_exit.png")
+	var ex := TextureButton.new()
+	ex.texture_normal = _atlas(exit_tex, Rect2(0, 0, EXIT_SIZE.x, EXIT_SIZE.y))
+	ex.texture_focused = _atlas(exit_tex, Rect2(0, EXIT_SIZE.y, EXIT_SIZE.x, EXIT_SIZE.y))
+	ex.texture_hover = ex.texture_focused
+	ex.texture_pressed = _atlas(exit_tex, Rect2(0, EXIT_SIZE.y * 2, EXIT_SIZE.x, EXIT_SIZE.y))
+	ex.focus_mode = Control.FOCUS_ALL
+	ex.position = EXIT_POS
+	ex.pressed.connect(close)
+	ex.mouse_entered.connect(ex.grab_focus)
+	_panel.add_child(ex)
+	_buttons["exit"] = ex
 	_center()
 
 

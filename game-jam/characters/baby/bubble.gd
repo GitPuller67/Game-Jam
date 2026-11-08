@@ -29,6 +29,8 @@ var rewind_anchor: Interactable = null
 ## Y has to be held this long before rewinding starts (so a quick tap only presses keypads).
 @export var rewind_hold_delay: float = 0.15
 var _rewind_hold := 0.0
+var _press_pending := false
+var _rewound_this_hold := false
 
 @export_group("Energy")
 ## The baby's energy (HUD "Baby energy" bar). Time powers use it up; it refills when they're not in use.
@@ -75,10 +77,17 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Y is both "press" (tap) and "rewind" (hold), so press() fires when Y is let go,
+	# and only if the hold didn't turn into a rewind.
 	if event.is_action_pressed("bubble_press"):
-		for target in hovered:
-			if is_instance_valid(target):
-				target.press()
+		_press_pending = true
+		_rewound_this_hold = false
+	elif event.is_action_released("bubble_press") and _press_pending:
+		_press_pending = false
+		if not _rewound_this_hold:
+			for target in hovered:
+				if is_instance_valid(target):
+					target.press()
 
 
 func _process(delta: float) -> void:
@@ -175,6 +184,7 @@ func _update_rewind(delta: float) -> void:
 		pick.reset_time()
 	rewinding.append(pick)
 	rewind_anchor = pick
+	_rewound_this_hold = true
 	pick.start_rewind()
 
 
@@ -221,6 +231,8 @@ func _update_energy(delta: float) -> void:
 	var drain := 0.0
 	if not rewinding.is_empty():
 		drain = rewind_drain
+		if is_instance_valid(rewind_anchor) and "rewind_drain_scale" in rewind_anchor:
+			drain *= float(rewind_anchor.get("rewind_drain_scale"))
 	elif not time_affected.is_empty():
 		# stronger effects cost more: how far time is pushed from normal
 		var strength := absf(log(time_factor)) / log(1.0 / min_time_factor) if time_factor < 1.0 \
@@ -242,5 +254,13 @@ func _update_energy(delta: float) -> void:
 	if exhausted and energy >= restart_energy:
 		exhausted = false
 	modulate = Color(0.6, 0.6, 0.65, 0.7) if exhausted else Color.WHITE
+	if energy != before:
+		energy_changed.emit(energy, max_energy)
+
+
+## Adds energy (the Father soothing the baby).
+func add_energy(amount: float) -> void:
+	var before := energy
+	energy = minf(energy + amount, max_energy)
 	if energy != before:
 		energy_changed.emit(energy, max_energy)

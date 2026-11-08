@@ -23,8 +23,8 @@ const RECTS := [
 	[189, -23, 201, -20],                     # vent duct 4 -> 5 (64 high, character is 51)
 	[202, -23, 229, 9],                       # Room 5 (drop)
 	[230, 5, 230, 9], [231, 0, 236, 9], [237, 0, 237, 3],   # stairs up to Room 6
-	[238, -2, 277, 3],                        # Room 6 (6 tiles high)
-	[278, 0, 281, 3],                         # Room 6 exit door + nook (64 high)
+	[238, -2, 257, 3],                        # Room 6 (6 tiles high, 20 wide: clock + door both on screen)
+	[258, 0, 261, 3],                         # Room 6 exit door + nook (64 high)
 ]
 
 var ts: TileSet
@@ -383,9 +383,9 @@ func paint_decor() -> void:
 	# corridor + Room 4
 	deco(144, -16, "lamp"); deco(154, -24, "lamp"); deco(170, -24, "lamp"); deco(162, -16, "poster"); deco(166, -16, "switch"); deco(157, -17, "red_cross")
 	# Room 6 ward
-	window(241, -2); deco(246, -1, "gas"); deco(248, -1, "call"); deco(252, -2, "vent")
-	deco(266, -1, "notice_l"); deco(267, -1, "notice_r"); deco(274, -1, "sanitizer"); deco(276, -1, "sharps")
-	deco(253, -2, "tv_l"); deco(254, -2, "tv_r")
+	window(241, -2); deco(246, -1, "gas"); deco(247, -1, "call"); deco(252, -2, "vent")
+	deco(257, -1, "sanitizer")
+	deco(244, -2, "tv_l"); deco(245, -2, "tv_r")
 
 
 # ----------------------------------------------------------------- map
@@ -415,7 +415,7 @@ func build_map() -> void:
 
 	var anchors := Node2D.new()
 	add(root, anchors, "RoomAnchors")
-	var centers := [Vector2(384, -136), Vector2(1180, -56), Vector2(1920, -240), Vector2(2704, -288), Vector2(3456, -72), Vector2(4128, 16)]
+	var centers := [Vector2(384, -136), Vector2(1180, -56), Vector2(1920, -240), Vector2(2704, -288), Vector2(3456, -72), Vector2(3968, 16)]
 	for i in centers.size():
 		marker(anchors, "Room%d" % (i + 1), centers[i])
 
@@ -818,76 +818,87 @@ func key(a: Animation, path: String, keys: Array, discrete := false) -> void:
 func room6(rooms: Node2D) -> void:
 	var r := Node2D.new()
 	add(rooms, r, "Room6_TimeLoopWard")
-	note(r, "ROOM 6 - Ward stuck in a 10-second loop\nBed rolls, curtain opens, nurse drops her tray, clock turns,\nexit door is open from 7.0s to 8.4s. LoopPlayer drives it all;\nRoom6.loop_speed changes the speed of the whole room.", Vector2(3816, -28))
-	marker(r, "LoopClock", Vector2(4128, -8))
-	var glow := spr(r, "ClockGlow", radial(56, Color(1, 0.9, 0.4, 0.7), Color(1, 0.9, 0.4, 0)), Vector2(4128, -8), -1, true)
+	note(r, "ROOM 6 - Ward stuck in a seamless 10-second loop\nBed rolls out and back, curtain opens and closes, nurse drops her tray\nand it floats back; exit door is open only from 7.05s to 7.15s. LoopPlayer drives it all;\nRoom6.loop_speed changes the speed of the whole room.", Vector2(3816, -28))
+	marker(r, "LoopClock", Vector2(3990, -8))
+	var glow := spr(r, "ClockGlow", radial(56, Color(1, 0.9, 0.4, 0.7), Color(1, 0.9, 0.4, 0)), Vector2(3990, -8), -1, true)
 	glow.set_script(load("res://scripts/pulse.gd"))
 	glow.set("scale_amount", 0.1)
-	clock(r, "BigClock", 32, Vector2(4128, -8))
+	clock(r, "BigClock", 32, Vector2(3990, -8))
 	var bed_tex := tex(GEN + "bed_side.png")
 	var bed := anim_sprite(r, "BedA", frames(bed_tex, 64, 32, [["roll", [0, 1], 8.0, true]]), Vector2(3830, 32), "roll", 1)
 	bed.speed_scale = 0.0
-	spr(r, "BedB", atlas(bed_tex, Rect2(0, 0, 64, 32)), Vector2(4220, 32), 1)
-	spr(r, "IVStand", tex(GEN + "iv_stand.png"), Vector2(4288, 16), 1)
-	spr(r, "HeartMonitor", tex(GEN + "heart_monitor.png"), Vector2(4196, -12), 0)
-	spr(r, "Chair", tex(GEN + "chair.png"), Vector2(3980, 40), 0)
+	spr(r, "BedB", atlas(bed_tex, Rect2(0, 0, 64, 32)), Vector2(4040, 32), 1)
+	spr(r, "IVStand", tex(GEN + "iv_stand.png"), Vector2(3978, 16), 1)
+	spr(r, "HeartMonitor", tex(GEN + "heart_monitor.png"), Vector2(4012, -12), 0)
+	spr(r, "Chair", tex(GEN + "chair.png"), Vector2(3958, 40), 0)
 	var csf := frames(tex(GEN + "curtain_side.png"), 48, 80, [["slide", [0, 1, 2, 3], 1.0, false]])
-	var cur := anim_sprite(r, "Curtain", csf, Vector2(4228, -32), "", 3)
-	var cur2 := anim_sprite(r, "CurtainOpen", csf, Vector2(3912, -32), "", 3)
+	var cur := anim_sprite(r, "Curtain", csf, Vector2(4048, -32), "", 3)
+	var cur2 := anim_sprite(r, "CurtainOpen", csf, Vector2(3810, -32), "", 3)
 	cur2.frame = 3
-	var nurse := spr(r, "Nurse", tex(GEN + "nurse_tray.png"), Vector2(4380, 12), 4)
-	nurse.hframes = 3
+	var nurse := spr(r, "Nurse", tex(GEN + "nurse_tray.png"), Vector2(4090, 12), 4)
+	nurse.hframes = 8   # 0-3 walk, 4 stand, 5 stumble, 6 shock, 7 reach
 	nurse.flip_h = true   # drawn facing right; she walks left
-	var tray := spr(r, "Tray", tex(GEN + "tray_full.png"), Vector2(4302, 27), 4); tray.visible = false; tray.flip_h = true
-	var cup := spr(r, "Cup", tex(GEN + "cup.png"), Vector2(4318, 52), 4); cup.visible = false
-	var plate := spr(r, "Plate", tex(GEN + "plate.png"), Vector2(4320, 55), 4); plate.visible = false
-	var apple := spr(r, "Apple", tex(GEN + "apple.png"), Vector2(4320, 52), 4); apple.visible = false
+	var tray := spr(r, "Tray", tex(GEN + "tray_full.png"), Vector2(4052, 27), 4); tray.visible = false; tray.flip_h = true
+	var cup := spr(r, "Cup", tex(GEN + "cup.png"), Vector2(4042, 50), 4); cup.visible = false
+	var plate := spr(r, "Plate", tex(GEN + "plate.png"), Vector2(4046, 55), 4); plate.visible = false
+	var apple := spr(r, "Apple", tex(GEN + "apple.png"), Vector2(4048, 50), 4); apple.visible = false
 	var ex := Node2D.new()
-	ex.position = Vector2(4448, 0)
+	ex.position = Vector2(4128, 0)
 	add(r, ex, "ExitDoor")
 	spr(ex, "Door", tex(GEN + "ward_door.png"), Vector2.ZERO)
 	var eb := StaticBody2D.new(); add(ex, eb, "Body"); rect_shape(eb, "Shape", Vector2(10, 64), Vector2(8, 32))
-	var flash := ColorRect.new()
-	flash.position = Vector2(3808, -32)
-	flash.size = Vector2(704, 96)
-	flash.color = Color(0.85, 0.92, 1, 0)
-	flash.z_index = 40
-	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add(r, flash, "RewindFlash")
-
+	# One continuous 10-second loop: everything ends exactly where it started, so there's no jump.
+	#  0.0-3.4  bed rolls out, curtain opens, nurse walks in with her tray
+	#  3.75     she stumbles, 4.0 the tray leaves her hands - tray clatters, food scatters
+	#  5.4-5.9  the food floats back up onto the tray (time pulling it back)
+	#  6.4-9.4  bed rolls back, curtain closes, nurse walks back out, turns round at 9.6
+	#  7.05-7.15 the exit door is open (only a tenth of a second - slow the room down to get through)
+	#  clock: second hand goes all the way round; minute/hour hands creep forward then sweep back
 	var a := Animation.new()
 	a.length = 10.0
 	a.loop_mode = Animation.LOOP_LINEAR
-	key(a, "BedA:position", [[0.0, Vector2(3830, 32)], [0.6, Vector2(3830, 32)], [3.4, Vector2(3990, 32)], [10.0, Vector2(3990, 32)]])
-	key(a, "BedA:speed_scale", [[0.0, 0.0], [0.6, 1.0], [3.4, 0.0]], true)
-	key(a, "Curtain:frame", [[0.0, 0], [1.5, 1], [1.75, 2], [2.0, 3]], true)
-	key(a, "Nurse:position", [[0.0, Vector2(4380, 12)], [3.0, Vector2(4300, 12)], [10.0, Vector2(4300, 12)]])
+	key(a, "BedA:position", [[0.0, Vector2(3830, 32)], [0.6, Vector2(3830, 32)], [3.4, Vector2(3888, 32)], [6.4, Vector2(3888, 32)], [9.2, Vector2(3830, 32)], [10.0, Vector2(3830, 32)]])
+	key(a, "BedA:speed_scale", [[0.0, 0.0], [0.6, 1.0], [3.4, 0.0], [6.4, -1.0], [9.2, 0.0]], true)
+	key(a, "Curtain:frame", [[0.0, 0], [1.5, 1], [1.75, 2], [2.0, 3], [7.6, 2], [7.85, 1], [8.1, 0]], true)
+	key(a, "Nurse:position", [[0.0, Vector2(4090, 12)], [2.6, Vector2(4050, 12)], [3.75, Vector2(4050, 12)], [3.95, Vector2(4045, 12)],
+		[5.9, Vector2(4045, 12)], [6.4, Vector2(4050, 12)], [9.4, Vector2(4090, 12)], [10.0, Vector2(4090, 12)]])
+	key(a, "Nurse:flip_h", [[0.0, true], [6.2, false], [9.6, true]], true)
 	var nf := []
-	for i in 13:
-		nf.append([i * 0.25, i % 2])
-	nf.append([3.2, 0])
-	nf.append([5.0, 2])
+	var step := 0.16                        # one walk frame (4-frame cycle ~ two steps per 0.64s)
+	for i in int(2.6 / step):
+		nf.append([i * step, i % 4])        # walking in
+	nf.append([2.6, 4])                     # standing with the tray
+	nf.append([3.75, 5])                    # stumbles - the tray slips
+	nf.append([4.0, 6])                     # arms up in shock
+	nf.append([5.3, 7])                     # reaches out as the food floats back
+	nf.append([5.9, 4])                     # tray back in her hands
+	for i in int((9.4 - 6.4) / step):
+		nf.append([6.4 + i * step, i % 4])  # walking back out
+	nf.append([9.4, 4])
 	key(a, "Nurse:frame", nf, true)
-	key(a, "Tray:visible", [[0.0, false], [5.0, true]], true)
-	key(a, "Tray:texture", [[0.0, tex(GEN + "tray_full.png")], [5.45, tex(GEN + "tray.png")]], true)
-	key(a, "Tray:position", [[5.0, Vector2(4302, 27)], [5.15, Vector2(4296, 22)], [5.44, Vector2(4288, 52)], [5.45, Vector2(4288, 58)], [10.0, Vector2(4288, 58)]])
-	key(a, "Tray:rotation", [[5.0, 0.0], [5.44, -0.5], [5.6, -0.12], [10.0, -0.12]])
-	for it in [["Cup", Vector2(4292, 50), Vector2(4276, 40), Vector2(4264, 56)], ["Apple", Vector2(4298, 50), Vector2(4314, 38), Vector2(4330, 57)], ["Plate", Vector2(4296, 55), Vector2(4290, 52), Vector2(4282, 59)]]:
-		key(a, it[0] + ":visible", [[0.0, false], [5.45, true]], true)
-		key(a, it[0] + ":position", [[5.45, it[1]], [5.65, it[2]], [5.9, it[3]], [10.0, it[3]]])
+	key(a, "Tray:visible", [[0.0, false], [3.75, true], [5.9, false]], true)
+	key(a, "Tray:texture", [[0.0, tex(GEN + "tray_full.png")], [4.45, tex(GEN + "tray.png")], [5.85, tex(GEN + "tray_full.png")]], true)
+	key(a, "Tray:position", [[0.0, Vector2(4052, 27)], [3.75, Vector2(4052, 27)], [3.95, Vector2(4045, 25)], [4.15, Vector2(4040, 22)], [4.44, Vector2(4036, 52)],
+		[4.45, Vector2(4036, 58)], [5.4, Vector2(4036, 58)], [5.9, Vector2(4047, 27)], [10.0, Vector2(4052, 27)]])
+	key(a, "Tray:rotation", [[0.0, 0.0], [3.75, 0.0], [3.95, -0.25], [4.44, -0.5], [4.6, -0.12], [5.4, -0.12], [5.9, 0.0]])
+	for it in [["Cup", Vector2(4042, 50), Vector2(4026, 40), Vector2(4014, 56)], ["Apple", Vector2(4048, 50), Vector2(4064, 38), Vector2(4080, 57)], ["Plate", Vector2(4046, 55), Vector2(4040, 52), Vector2(4032, 59)]]:
+		key(a, it[0] + ":visible", [[0.0, false], [4.45, true], [5.85, false]], true)
+		key(a, it[0] + ":position", [[4.45, it[1]], [4.65, it[2]], [4.9, it[3]], [5.4, it[3]], [5.85, it[1]]])
+		key(a, it[0] + ":modulate", [[4.45, Color.WHITE], [5.4, Color.WHITE], [5.6, Color(1.3, 1.2, 0.8, 1.0)], [5.85, Color.WHITE]])
 	key(a, "BigClock/Second:rotation", [[0.0, 0.0], [10.0, TAU]])
-	key(a, "BigClock/Minute:rotation", [[0.0, 1.0], [10.0, 1.0 + TAU / 6.0]])
-	key(a, "BigClock/Hour:rotation", [[0.0, 5.2], [10.0, 5.2 + TAU / 72.0]])
-	key(a, "ExitDoor/Door:position", [[0.0, Vector2.ZERO], [6.6, Vector2.ZERO], [7.0, Vector2(0, -60)], [8.2, Vector2(0, -60)], [8.6, Vector2.ZERO]])
-	key(a, "ExitDoor/Body/Shape:disabled", [[0.0, false], [7.0, true], [8.4, false]], true)
-	key(a, "RewindFlash:color", [[0.0, Color(0.85, 0.92, 1, 0.6)], [0.35, Color(0.85, 0.92, 1, 0)], [9.5, Color(0.85, 0.92, 1, 0)], [9.95, Color(0.85, 0.92, 1, 0.85)], [10.0, Color(0.85, 0.92, 1, 0.6)]])
+	key(a, "BigClock/Minute:rotation", [[0.0, 1.0], [8.0, 1.0 + TAU / 6.0], [10.0, 1.0]])
+	key(a, "BigClock/Hour:rotation", [[0.0, 5.2], [8.0, 5.2 + TAU / 72.0], [10.0, 5.2]])
+	# The exit is only passable for a tenth of a second: at normal speed you can't make it,
+	# so the baby has to slow the room down (or rewind it) to get the Father through.
+	key(a, "ExitDoor/Door:position", [[0.0, Vector2.ZERO], [6.85, Vector2.ZERO], [7.05, Vector2(0, -60)], [7.15, Vector2(0, -60)], [7.35, Vector2.ZERO]])
+	key(a, "ExitDoor/Body/Shape:disabled", [[0.0, false], [7.05, true], [7.15, false]], true)
 	var lib := AnimationLibrary.new()
 	lib.add_animation("loop", a)
 	var ap := AnimationPlayer.new()
 	add(r, ap, "LoopPlayer")
 	ap.add_animation_library("", lib)
 	ap.autoplay = "loop"
-	marker(r, "ExitBeyond", Vector2(4500, 64))
+	marker(r, "ExitBeyond", Vector2(4180, 64))
 	r.set_script(load("res://scripts/time_loop_room.gd"))
 
 
@@ -1045,7 +1056,7 @@ func lighting(root: Node) -> void:
 	cone_light(st, "Light", Vector2(3744, 0), 160, 120, warm, 0.28)
 
 	var r6 := Node2D.new(); add(L, r6, "Room6")
-	shade(r6, "Shade", Rect2(3808, -32, 704, 96), dusk[0], dusk[1], dusk[2])
-	strip_light(r6, "CeilingLight1", Vector2(3990, -32), warm, 0.32, 100)
-	strip_light(r6, "CeilingLight2", Vector2(4360, -32), warm, 0.32, 100)
+	shade(r6, "Shade", Rect2(3808, -32, 384, 96), dusk[0], dusk[1], dusk[2])
+	strip_light(r6, "CeilingLight1", Vector2(3890, -32), warm, 0.32, 100)
+	strip_light(r6, "CeilingLight2", Vector2(4060, -32), warm, 0.32, 100)
 	window_shaft(r6, "WindowLight", Rect2(3856, -32, 32, 32), 64.0, Color(1.0, 0.78, 0.55), 0.55, 0.2)
