@@ -167,7 +167,8 @@ sprite_frames = SubResource("SpriteFrames_at4b5")
 animation = &"slide"
 autoplay = "default"
 
-[node name="Baby" parent="Visuals" unique_id=1142126627 instance=ExtResource("2_paef7")]
+[node name="Baby" parent="Visuals" unique_id=1142126627 node_paths=PackedStringArray("father_sprite") instance=ExtResource("2_paef7")]
+father_sprite = NodePath("../AnimatedSprite2D")
 
 [connection signal="timeout" from="SlideTimer" to="." method="_on_slide_timer_timeout"]
 [connection signal="timeout" from="SlideCooldownTimer" to="." method="_on_slide_cooldown_timer_timeout"]
