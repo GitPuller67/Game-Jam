@@ -43,6 +43,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if has_hit:
+		return # stay where it hit while the impact plays
 	position += transform.x * speed * time_scale * delta
 
 
