@@ -1,7 +1,9 @@
 extends Node2D
 ## The hospital level: the map (scenes/Map.tscn) played with the real Father, Baby + bubble, Enemy and HUD.
+##  - The Father starts standing on the map's PlayerStart marker in Room 1.
 ##  - Hover the bubble over the swinging lamp, the lift, a pillar, a Room 5 floater or the Room 6 clock
-##    and press interact to slow it down (the baby's time power).
+##    and hold controller 2's right stick left to slow it down (the baby's time power).
+##  - Press Y with the bubble over Room 1's keypad to open the exit door.
 ##  - Room 4's columns start breaking when the Father walks into Room 4.
 ##  - Touching a Room 5 floater calls take_damage(1) on the Father if he has that method.
 
@@ -9,20 +11,101 @@ extends Node2D
 @export var slow_duration := 4.0
 ## Overrides the Father camera's zoom in this level (his scene uses 5).
 @export var camera_zoom := 3.0
+## How quickly the camera's top/bottom limits follow the room heights (higher = snappier).
+@export var camera_limit_speed := 6.0
 
 @onready var map: Node2D = $Map
 @onready var father: Node2D = $Father
 
+# Camera clamping: the map's outer walls left/right, and per tile column the
+# top and bottom of the Solid layer (rooms sit at different heights).
+var _cam: Camera2D
+var _solid: TileMapLayer
+var _col_top := {}
+var _col_bottom := {}
+var _limit_top := 0.0
+var _limit_bottom := 0.0
+
 
 func _ready() -> void:
+	_place_father()
 	map.get_node("Rooms/Room4_Pillars").set("demo_autoplay", false)   # wait for the trigger instead
 	var cam := father.get_node_or_null("Camera2D") as Camera2D
 	if cam:
 		cam.zoom = Vector2.ONE * camera_zoom
+	_setup_camera_limits()
 	_setup_room1()
 	_add_time_targets()
 	_hook_hazards()
 	_add_room4_trigger()
+
+
+func _process(delta: float) -> void:
+	_update_camera_limits(1.0 - exp(-camera_limit_speed * delta))
+
+
+## Keeps the Father's camera inside the map so it never shows empty space past the walls.
+func _setup_camera_limits() -> void:
+	_cam = father.get_node_or_null("Camera2D") as Camera2D
+	_solid = map.get_node_or_null("Solid") as TileMapLayer
+	if _cam == null or _solid == null or _solid.tile_set == null:
+		return
+	var half := Vector2(_solid.tile_set.tile_size) / 2.0
+	var left := INF
+	var right := -INF
+	for cell in _solid.get_used_cells():
+		var centre := _solid.to_global(_solid.map_to_local(cell))
+		left = minf(left, centre.x - half.x)
+		right = maxf(right, centre.x + half.x)
+		_col_top[cell.x] = minf(_col_top.get(cell.x, INF), centre.y - half.y)
+		_col_bottom[cell.x] = maxf(_col_bottom.get(cell.x, -INF), centre.y + half.y)
+	_cam.limit_left = floori(left)
+	_cam.limit_right = ceili(right)
+	_update_camera_limits(1.0)   # start already clamped, no sweep on the first frame
+
+
+## Sets the camera's top/bottom limits from the columns that are on screen.
+## weight 1.0 snaps; smaller values ease towards the new limits.
+func _update_camera_limits(weight: float) -> void:
+	if _cam == null or _col_top.is_empty():
+		return
+	var view := get_viewport().get_visible_rect().size / _cam.zoom
+	var half_w := view.x / 2.0
+	# Where the camera will be horizontally once it's clamped to the side walls.
+	var cx := clampf(father.global_position.x, _cam.limit_left + half_w, _cam.limit_right - half_w)
+	var first := _solid.local_to_map(_solid.to_local(Vector2(cx - half_w, 0))).x
+	var last := _solid.local_to_map(_solid.to_local(Vector2(cx + half_w, 0))).x
+	var top := INF
+	var bottom := -INF
+	for col in range(first, last + 1):
+		if _col_top.has(col):
+			top = minf(top, _col_top[col])
+			bottom = maxf(bottom, _col_bottom[col])
+	if top == INF:
+		return
+	# A room shorter than the screen: centre it instead of pinning it to the top.
+	var spare := view.y - (bottom - top)
+	if spare > 0.0:
+		top -= spare / 2.0
+		bottom += spare / 2.0
+	_limit_top = lerpf(_limit_top, top, weight)
+	_limit_bottom = lerpf(_limit_bottom, bottom, weight)
+	_cam.limit_top = roundi(_limit_top)
+	_cam.limit_bottom = roundi(_limit_bottom)
+
+
+## Stands the Father on the map's PlayerStart marker (feet on the marker), so moving the
+## marker in Map.tscn moves the spawn.
+func _place_father() -> void:
+	var start := map.get_node_or_null("Rooms/Room1_FindingBaby/PlayerStart") as Node2D
+	if start == null:
+		push_warning("HospitalLevel: no PlayerStart marker in the map, Father stays where he is.")
+		return
+	var feet := 0.0
+	var body := father.get_node_or_null("StandingCollision") as CollisionShape2D
+	if body and body.shape:
+		feet = (body.transform * body.shape.get_rect()).end.y   # bottom of his collision box
+	father.global_position = start.global_position - Vector2(0, feet)
 
 
 func _add_time_targets() -> void:
