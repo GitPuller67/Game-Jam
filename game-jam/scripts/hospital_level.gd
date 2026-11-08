@@ -7,6 +7,8 @@ extends Node2D
 
 @export var slow_factor := 0.25
 @export var slow_duration := 4.0
+## Overrides the Father camera's zoom in this level (his scene uses 5).
+@export var camera_zoom := 4.0
 
 @onready var map: Node2D = $Map
 @onready var father: Node2D = $Father
@@ -14,6 +16,10 @@ extends Node2D
 
 func _ready() -> void:
 	map.get_node("Rooms/Room4_Pillars").set("demo_autoplay", false)   # wait for the trigger instead
+	var cam := father.get_node_or_null("Camera2D") as Camera2D
+	if cam:
+		cam.zoom = Vector2.ONE * camera_zoom
+	_setup_room1()
 	_add_time_targets()
 	_hook_hazards()
 	_add_room4_trigger()
@@ -91,3 +97,42 @@ func _add_room4_trigger() -> void:
 		if body == father:
 			room4.call("start_breaking")
 			trig.queue_free())
+
+
+## Room 1: the glass pod opens as the Father walks up, and the bubble works the keypad to open the exit door.
+func _setup_room1() -> void:
+	var r1 := map.get_node("Rooms/Room1_FindingBaby")
+	var pod := r1.get_node("BabyPod")
+	var trig := Area2D.new()
+	trig.name = "PodTrigger"
+	trig.position = Vector2(616, -48)
+	var cs := CollisionShape2D.new()
+	var shape := RectangleShape2D.new()
+	shape.size = Vector2(260, 96)
+	cs.shape = shape
+	trig.add_child(cs)
+	add_child(trig)
+	trig.body_entered.connect(func(body: Node) -> void:
+		if body != father:
+			return
+		trig.queue_free()
+		pod.get_node("PodDoor").call("open")
+		# the right-hand glass panel slides up into the pod roof too
+		var wall := pod.get_node("GlassWall") as Node2D
+		create_tween().tween_property(wall, "position:y", wall.position.y - 94.0, 0.6).set_trans(Tween.TRANS_QUAD)
+		(pod.get_node("GlassWallBody/Shape") as CollisionShape2D).set_deferred("disabled", true))
+
+	var keypad := r1.get_node("Keypad") as AnimatedSprite2D
+	var exit_door := r1.get_node("ExitDoor")
+	var btn := BubbleButton.new()
+	btn.name = "KeypadButton"
+	btn.position = keypad.position + Vector2(5, 7)
+	var bcs := CollisionShape2D.new()
+	var bshape := RectangleShape2D.new()
+	bshape.size = Vector2(16, 20)
+	bcs.shape = bshape
+	btn.add_child(bcs)
+	r1.add_child(btn)
+	btn.pressed.connect(func() -> void:
+		keypad.play("unlocked")
+		exit_door.call("open"))
