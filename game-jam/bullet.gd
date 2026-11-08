@@ -28,6 +28,8 @@ var mirrored: bool = false
 var has_hit: bool = false
 ## 1.0 = normal speed; set by slow_down_time() / reset_time().
 var time_scale: float = 1.0
+var _rewinder: Rewinder
+var _rewinding: bool = false
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
@@ -42,6 +44,10 @@ func _ready() -> void:
 	# The father holds it sideways (blade up), so start the spin on the blade-up frame.
 	animated_sprite.frame = HELD_FRAME
 	get_tree().create_timer(lifetime, false).timeout.connect(_on_lifetime_timeout)
+	_rewinder = Rewinder.new()
+	_rewinder.target = self
+	_rewinder.properties = PackedStringArray(["global_position"])
+	add_child(_rewinder)
 
 
 func _physics_process(delta: float) -> void:
@@ -74,6 +80,9 @@ func _on_animation_finished() -> void:
 
 
 func _on_lifetime_timeout() -> void:
+	if _rewinding:   # being pulled back by the baby: give it a bit longer
+		get_tree().create_timer(1.0, false).timeout.connect(_on_lifetime_timeout)
+		return
 	if not has_hit:
 		queue_free()
 
@@ -86,4 +95,28 @@ func slow_down_time() -> void:
 
 func reset_time() -> void:
 	time_scale = 1.0
+	modulate = Color.WHITE
+
+
+## Dynamic: slows down the further the stick is pushed left; pushing right doesn't speed it up.
+func set_time_factor(factor: float) -> void:
+	time_scale = clampf(factor, 0.0, 1.0)
+	modulate = Color.WHITE.lerp(slowed_tint, clampf((1.0 - time_scale) / 0.75, 0.0, 1.0))
+
+
+func can_rewind() -> bool:
+	return not has_hit
+
+
+func start_rewind() -> void:
+	if has_hit:
+		return
+	_rewinding = true
+	_rewinder.start()
+	modulate = Color(1.1, 0.75, 1.35)
+
+
+func stop_rewind() -> void:
+	_rewinding = false
+	_rewinder.stop()
 	modulate = Color.WHITE

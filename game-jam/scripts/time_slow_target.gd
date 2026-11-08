@@ -1,25 +1,33 @@
 class_name TimeSlowTarget
 extends Interactable
-## Something the baby can slow down: hover the bubble over it and hold controller 2's
-## right stick LEFT. The bubble calls slow_down_time(), then reset_time() when the stick
-## is let go or this leaves the bubble.
-## Each target node gets `property` (e.g. time_scale) multiplied by slow_factor while slowed.
+## Something the baby can control the time of with the bubble over it:
+##  - right stick LEFT / RIGHT: slows it down / speeds it up - how far the stick is pushed sets how much.
+##    The bubble calls set_time_factor() every frame, then reset_time() when the stick is let go
+##    or this leaves the bubble.
+##  - hold Y: rewinds it (needs at least one Rewinder, added with add_rewind()).
+## Each target node gets `property` (e.g. time_scale) multiplied by the factor.
 
 signal slowed
 signal restored
 
 @export var targets: Array[Node] = []
 @export var property := &"time_scale"
+## Used by slow_down_time() / speed_up_time() (fixed amounts, for anything that still calls them).
 @export var slow_factor := 0.25
-## Multiplier while the baby speeds it up (right stick RIGHT).
 @export var speed_factor := 2.0
 ## Unused since slowing became hold-to-slow; kept so existing levels that set it still load.
 @export var slow_duration := 4.0
-## Tinted blue while slowed so the player can see it worked.
+## Tinted while affected so the player can see it working (blue = slow, orange = fast, purple = rewind).
 @export var tint_node: CanvasItem
 
 var is_slowed := false
+var is_rewinding := false
 var _normal := {}
+var _rewinders: Array[Rewinder] = []
+
+const SLOW_TINT := Color(0.7, 0.85, 1.25)
+const FAST_TINT := Color(1.25, 0.95, 0.7)
+const REWIND_TINT := Color(1.1, 0.75, 1.35)
 
 
 func _ready() -> void:
@@ -27,26 +35,32 @@ func _ready() -> void:
 	monitoring = false   # the bubble does the detecting
 
 
+# --- Time speed ---
+func set_time_factor(factor: float) -> void:
+	if is_rewinding:
+		return
+	if not is_slowed:
+		is_slowed = true
+		for t in targets:
+			if is_instance_valid(t):
+				_normal[t] = t.get(property)
+		slowed.emit()
+	for t in targets:
+		if is_instance_valid(t) and _normal.has(t):
+			t.set(property, float(_normal[t]) * factor)
+	if tint_node:
+		if factor < 1.0:
+			tint_node.modulate = Color.WHITE.lerp(SLOW_TINT, clampf((1.0 - factor) / 0.75, 0.0, 1.0))
+		else:
+			tint_node.modulate = Color.WHITE.lerp(FAST_TINT, clampf(factor - 1.0, 0.0, 1.0))
+
+
 func slow_down_time() -> void:
-	_apply(slow_factor, Color(0.7, 0.85, 1.25))
-	slowed.emit()
+	set_time_factor(slow_factor)
 
 
 func speed_up_time() -> void:
-	_apply(speed_factor, Color(1.25, 0.95, 0.7))
-	slowed.emit()
-
-
-func _apply(factor: float, tint: Color) -> void:
-	if is_slowed:
-		reset_time()
-	is_slowed = true
-	for t in targets:
-		if is_instance_valid(t):
-			_normal[t] = t.get(property)
-			t.set(property, float(_normal[t]) * factor)
-	if tint_node:
-		tint_node.modulate = tint
+	set_time_factor(speed_factor)
 
 
 func reset_time() -> void:
@@ -60,6 +74,46 @@ func reset_time() -> void:
 		tint_node.modulate = Color.WHITE
 	is_slowed = false
 	restored.emit()
+
+
+# --- Rewind ---
+func can_rewind() -> bool:
+	return not _rewinders.is_empty()
+
+
+func start_rewind() -> void:
+	if _rewinders.is_empty() or is_rewinding:
+		return
+	reset_time()
+	is_rewinding = true
+	for r in _rewinders:
+		r.start()
+	if tint_node:
+		tint_node.modulate = REWIND_TINT
+
+
+func stop_rewind() -> void:
+	if not is_rewinding:
+		return
+	is_rewinding = false
+	for r in _rewinders:
+		r.stop()
+	if tint_node:
+		tint_node.modulate = Color.WHITE
+
+
+## Records `props` on `node` so it can be rewound. `freeze` is set to 0 while rewinding
+## (&"" for none). REVERSE mode instead runs `freeze` backwards (e.g. an animation loop's speed).
+func add_rewind(node: Node, props: PackedStringArray, freeze := &"time_scale", mode := Rewinder.Mode.SNAPSHOT) -> Rewinder:
+	var r := Rewinder.new()
+	r.name = "Rewinder%d" % _rewinders.size()
+	r.target = node
+	r.properties = props
+	r.freeze_property = freeze
+	r.mode = mode
+	add_child(r)
+	_rewinders.append(r)
+	return r
 
 
 ## Helper for building targets from code.

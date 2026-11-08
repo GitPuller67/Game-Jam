@@ -113,21 +113,29 @@ func _add_time_targets() -> void:
 	var rooms := map.get_node("Rooms")
 	# Room 2: swinging lamp (the area rides on the lamp head)
 	var lamp := rooms.get_node("Room2_Corridor/SwingingLamp")
-	_target(lamp.get_node("Lamp"), _circle(14), Vector2(0, 6), [lamp], lamp.get_node("Lamp"))
+	_target(lamp.get_node("Lamp"), _circle(14), Vector2(0, 6), [lamp], lamp.get_node("Lamp")) 		.add_rewind(lamp, PackedStringArray(["t"]))
 	# Room 2: the lift car
 	var lift := rooms.get_node("Room2_Corridor/Elevator")
-	_target(lift.get_node("Car"), _rect(Vector2(64, 76)), Vector2(32, -38), [lift], lift.get_node("Car"))
+	var lt := _target(lift.get_node("Car"), _rect(Vector2(64, 76)), Vector2(32, -38), [lift], lift.get_node("Car"))
+	lt.add_rewind(lift, PackedStringArray(["t", "moving", "target", "from_y", "wait"]))
+	lt.add_rewind(lift.get_node("Car"), PackedStringArray(["position"]), &"")
 	# Room 4: each column and its floating chunk
 	for p in rooms.get_node("Room4_Pillars/Pillars").get_children():
 		_target(p, _rect(Vector2(28, 192)), Vector2(0, 96), [p, p.get_node("Chunk")], p)
 	# Room 5: every floating object
 	for f in rooms.get_node("Room5_UncannyDrop/Floaters").get_children():
-		_target(f, _circle(14), Vector2.ZERO, [f], f)
+		_target(f, _circle(14), Vector2.ZERO, [f], f).add_rewind(f, PackedStringArray(["t"]))
 	# Room 6: the big clock slows the whole 10-second loop
 	var ward := rooms.get_node("Room6_TimeLoopWard")
 	var clock := ward.get_node("BigClock")
 	var t := _target(ward, _circle(18), clock.position, [ward], clock)
 	t.property = &"loop_speed"
+	# rewinding the clock plays the whole ward loop backwards
+	t.add_rewind(ward, PackedStringArray(), &"loop_speed", Rewinder.Mode.REVERSE)
+	# the enemy can be slowed, sped up and rewound too
+	var enemy := get_node_or_null("Enemy") as Node2D
+	if enemy:
+		_target(enemy, _rect(Vector2(20, 48)), Vector2(0, -12), [enemy], enemy.get_node("AnimatedSprite2D")) 			.add_rewind(enemy, PackedStringArray(["global_position", "velocity"]))
 
 
 func _target(parent: Node, shape: Shape2D, offset: Vector2, what: Array, tint: CanvasItem) -> TimeSlowTarget:

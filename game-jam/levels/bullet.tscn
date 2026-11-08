@@ -4,6 +4,22 @@
 [ext_resource type="Texture2D" uid="uid://4h8apf7mt1in" path="res://assets/spritesheets/scalpel_projectile_sheet.png" id="2_spin"]
 [ext_resource type="Texture2D" uid="uid://chdv37hy3fv8d" path="res://assets/spritesheets/scalpel_impact_sheet.png" id="3_impact"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact0"]
+atlas = ExtResource("3_impact")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact1"]
+atlas = ExtResource("3_impact")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact2"]
+atlas = ExtResource("3_impact")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_impact3"]
+atlas = ExtResource("3_impact")
+region = Rect2(48, 0, 16, 16)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_spin0"]
 atlas = ExtResource("2_spin")
 region = Rect2(0, 0, 20, 20)
@@ -36,77 +52,51 @@ region = Rect2(120, 0, 20, 20)
 atlas = ExtResource("2_spin")
 region = Rect2(140, 0, 20, 20)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_impact0"]
-atlas = ExtResource("3_impact")
-region = Rect2(0, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_impact1"]
-atlas = ExtResource("3_impact")
-region = Rect2(16, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_impact2"]
-atlas = ExtResource("3_impact")
-region = Rect2(32, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_impact3"]
-atlas = ExtResource("3_impact")
-region = Rect2(48, 0, 16, 16)
-
 [sub_resource type="SpriteFrames" id="SpriteFrames_scalpel"]
 animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_impact0")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_impact1")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_impact2")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_impact3")
 }],
-"loop": false,
+"loop": 0,
 "name": &"impact",
 "speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_spin0")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_spin1")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_spin2")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_spin3")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_spin4")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_spin5")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_spin6")
-},
-{
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_spin7")
 }],
-"loop": true,
+"loop": 1,
 "name": &"spin",
 "speed": 20.0
 }]
@@ -116,6 +106,7 @@ size = Vector2(16, 4)
 
 [node name="Bullet" type="Area2D" unique_id=2027033426]
 script = ExtResource("1_wpoqv")
+speed = 200.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=143778641]
 sprite_frames = SubResource("SpriteFrames_scalpel")
@@ -125,6 +116,5 @@ animation = &"impact"
 shape = SubResource("RectangleShape2D_0e51w")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1031936781]
-rect = Rect2(-10, -10, 20, 20)
 
 [connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

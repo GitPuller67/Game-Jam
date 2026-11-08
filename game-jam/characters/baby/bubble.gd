@@ -1,9 +1,10 @@
 class_name Bubble
 extends Area2D
 ## The baby's bubble. Moved with the mouse or controller 2's left stick.
-## - Hold right stick LEFT: slow_down_time() on every interactable in the bubble.
-## - Hold right stick RIGHT: speed_up_time() on every interactable in the bubble.
+## - Right stick LEFT / RIGHT: slows down / speeds up every interactable in the bubble. It's
+##   dynamic: the further the stick is pushed, the stronger the effect (set_time_factor()).
 ## - Press Y: press() on every interactable in the bubble (keypads, switches...).
+## - Hold Y: rewinds every interactable in the bubble that can be rewound (the Father too).
 ## Interactables that leave the bubble, or are in it when the stick is let go, get reset_time().
 
 enum TimeMode { NORMAL, SLOW, FAST }
@@ -21,6 +22,18 @@ var using_mouse: bool = true
 var time_mode: TimeMode = TimeMode.NORMAL
 ## Interactables currently being slowed down / sped up by the bubble.
 var time_affected: Array[Interactable] = []
+## Interactables currently being rewound (Y held).
+var rewinding: Array[Interactable] = []
+
+@export_group("Time control")
+## Time factor with the stick pushed fully left (0.15 = 15% speed).
+@export var min_time_factor: float = 0.15
+## Time factor with the stick pushed fully right.
+@export var max_time_factor: float = 2.5
+## Stick movement below this is ignored.
+@export var time_deadzone: float = 0.08
+## Current factor (1 = normal), for UI / debugging.
+var time_factor: float = 1.0
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -71,29 +84,53 @@ func _move(delta: float) -> void:
 
 # --- Time control ---
 func _update_time_control() -> void:
+	_update_rewind()
+
 	var axis := Input.get_axis("bubble_slow_time", "bubble_speed_time")
-	var new_mode := TimeMode.NORMAL
-	if axis < 0.0:
-		new_mode = TimeMode.SLOW
-	elif axis > 0.0:
-		new_mode = TimeMode.FAST
-
-	# Stick released or flipped direction: put everything back to normal first.
-	if new_mode != time_mode:
-		_reset_all_time()
-		time_mode = new_mode
-
-	if time_mode == TimeMode.NORMAL:
+	if absf(axis) < time_deadzone:
+		if time_mode != TimeMode.NORMAL:
+			_reset_all_time()
+			time_mode = TimeMode.NORMAL
+		time_factor = 1.0
 		return
 
-	# Apply to anything in the bubble that isn't affected yet (e.g. a bullet that just flew in).
+	# How far the stick is pushed sets how strong it is: full left = min_time_factor,
+	# full right = max_time_factor, smoothly in between.
+	var amount := inverse_lerp(time_deadzone, 1.0, absf(axis))
+	if axis < 0.0:
+		time_mode = TimeMode.SLOW
+		time_factor = pow(min_time_factor, amount)
+	else:
+		time_mode = TimeMode.FAST
+		time_factor = pow(max_time_factor, amount)
+
 	for target in hovered:
+		if not is_instance_valid(target) or rewinding.has(target):
+			continue
 		if not time_affected.has(target):
 			time_affected.append(target)
-			if time_mode == TimeMode.SLOW:
-				target.slow_down_time()
-			else:
-				target.speed_up_time()
+		target.set_time_factor(time_factor)
+
+
+# --- Rewind (hold Y) ---
+func _update_rewind() -> void:
+	if not Input.is_action_pressed("bubble_rewind_time"):
+		_stop_all_rewind()
+		return
+	for target in hovered:
+		if is_instance_valid(target) and not rewinding.has(target) and target.can_rewind():
+			if time_affected.has(target):
+				time_affected.erase(target)
+				target.reset_time()
+			rewinding.append(target)
+			target.start_rewind()
+
+
+func _stop_all_rewind() -> void:
+	for target in rewinding:
+		if is_instance_valid(target):
+			target.stop_rewind()
+	rewinding.clear()
 
 
 func _reset_all_time() -> void:
@@ -115,6 +152,9 @@ func _on_target_exited(node: Node2D) -> void:
 	if target == null:
 		return
 	hovered.erase(target)
+	if rewinding.has(target):
+		rewinding.erase(target)
+		target.stop_rewind()
 	# Left the bubble: it goes back to normal speed.
 	if time_affected.has(target):
 		time_affected.erase(target)

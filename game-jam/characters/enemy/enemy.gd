@@ -26,6 +26,8 @@ var attack_dir: float = 1.0
 var attack_landed: bool = false
 var health: int
 var dead: bool = false
+## 1 = normal. Changed by the baby's bubble (slow / fast), 0 while rewinding.
+var time_scale: float = 1.0
 
 var target: Father = null                  # null = wandering, set = Father spotted
 var spawn_x: float                         # where the enemy was placed in the level
@@ -41,6 +43,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	delta *= time_scale
+	animated_sprite.speed_scale = time_scale
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -53,7 +57,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		wander()
 
+	# move at time_scale speed (velocity stays in normal-time units)
+	var normal_velocity := velocity
+	velocity *= time_scale
 	move_and_slide()
+	velocity = velocity / time_scale if time_scale > 0.001 else normal_velocity
 
 
 func wander() -> void:

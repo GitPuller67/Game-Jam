@@ -71,12 +71,12 @@ bubble_down={
 ]
 }
 bubble_slow_time={
-"deadzone": 0.5,
+"deadzone": 0.15,
 "events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":1,"axis":2,"axis_value":-1.0,"script":null)
 ]
 }
 bubble_speed_time={
-"deadzone": 0.5,
+"deadzone": 0.15,
 "events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":1,"axis":2,"axis_value":1.0,"script":null)
 ]
 }

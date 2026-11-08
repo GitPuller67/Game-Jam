@@ -64,6 +64,10 @@ var is_crouching: bool = false
 var last_floor_x: float = 0.0
 var time_since_floor: float = 0.0
 var has_jumped: bool = false
+## 1 = normal. The baby's bubble changes this to slow him down / speed him up; 0 while rewinding.
+var time_scale: float = 1.0
+## The bubble hovers over this to control his time / rewind him.
+var time_handle: TimeSlowTarget
 
 
 # --- @onready variables ---
@@ -96,6 +100,7 @@ var is_using_controller: bool = false
 
 func _ready() -> void:
 	current_ammo = max_ammo
+	_add_time_handle()
 	health = max_health
 	health_changed.emit.call_deferred(health, max_health)
 
@@ -209,15 +214,38 @@ func respawn(at: Vector2) -> void:
 	is_invincible = false
 
 
+# --- Time control (the baby's bubble) ---
+## Lets the bubble slow him down, speed him up (right stick) and rewind him (hold Y).
+func _add_time_handle() -> void:
+	var box := RectangleShape2D.new()
+	box.size = Vector2(24, 46)
+	var nodes: Array[Node] = [self]
+	time_handle = TimeSlowTarget.make(self, box, Vector2(0, 2), nodes, visuals)
+	time_handle.add_rewind(self, PackedStringArray(["global_position", "velocity", "facing_direction"]))
+
+
+## move_and_slide() at time_scale speed (velocity stays in "normal time" units).
+func _move_scaled() -> void:
+	if is_equal_approx(time_scale, 1.0):
+		move_and_slide()
+		return
+	var normal_velocity := velocity
+	velocity = normal_velocity * time_scale
+	move_and_slide()
+	velocity = velocity / time_scale if time_scale > 0.001 else normal_velocity
+
+
 # --- Built-in functions ---
 func _physics_process(delta: float) -> void:
+	delta *= time_scale
+	animated_sprite.speed_scale = time_scale
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
 	if current_state == State.DEAD:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
-		move_and_slide()
+		_move_scaled()
 		return
 		
 	# Handle crouch.			
@@ -265,7 +293,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.x = move_toward(velocity.x, 0, speed)
 
-	move_and_slide()
+	_move_scaled()
 
 
 ## On the ground, or just walked off a ledge (falling, not from a jump, and
