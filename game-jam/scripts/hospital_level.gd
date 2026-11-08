@@ -49,7 +49,6 @@ func _ready() -> void:
 	_add_room4_trigger()
 	_setup_health()
 	_setup_energy()
-	_add_soothe_prompt()
 	_add_end_trigger()
 	# Restarted from the end screen: go straight into the game, no main menu.
 	if EndScreen.skip_menu_once:
@@ -317,25 +316,15 @@ func _setup_ammo_hud() -> void:
 
 ## The Shoot prompt only shows once he has scalpels, with how many are left.
 func _on_ammo_changed(ammo: int) -> void:
-	var prompt := get_node_or_null("HUD/BottomBar/Controls/ShootPrompt") as Control
-	if prompt:
-		prompt.visible = ammo > 0
-		(prompt.get_node("Row/Label") as Label).text = "Shoot  x%d" % ammo
+	var hud := get_node_or_null("HUD")
+	if hud and hud.has_method("set_ammo"):
+		hud.set_ammo(ammo)
 
 
 func _show_pickup_popup(amount: int) -> void:
-	var popup := get_node_or_null("HUD/WeaponPopup") as Control
-	if popup == null:
-		return
-	(popup.get_node("Row/Text/Title") as Label).text = "Picked up"
-	(popup.get_node("Row/Text/WeaponName") as Label).text = "Scalpels x%d" % amount
-	(popup.get_node("Row/Glyph") as Control).visible = false
-	popup.modulate.a = 1.0
-	popup.visible = true
-	var tw := popup.create_tween()
-	tw.tween_interval(2.0)
-	tw.tween_property(popup, "modulate:a", 0.0, 0.5)
-	tw.tween_callback(popup.hide)
+	var hud := get_node_or_null("HUD")
+	if hud and hud.has_method("show_popup"):
+		hud.show_popup("PICKED UP %d SCALPELS" % amount)
 
 
 # --- Health bar + respawning ---
@@ -359,11 +348,10 @@ func _setup_energy() -> void:
 
 
 func _on_energy_changed(value: float, max_value: float) -> void:
-	var bar := get_node_or_null("HUD/BottomBar/Bars/BabyEnergyBar") as ProgressBar
-	if bar:
-		bar.value = 100.0 * value / maxf(max_value, 1.0)
+	var hud := get_node_or_null("HUD")
+	if hud and hud.has_method("set_energy"):
 		var bubble := father.find_child("Bubble", true, false)
-		bar.modulate = Color(1, 0.55, 0.55) if bubble and bubble.get("exhausted") else Color.WHITE
+		hud.set_energy(100.0 * value / maxf(max_value, 1.0), bubble != null and bool(bubble.get("exhausted")))
 
 
 func _setup_health() -> void:
@@ -388,9 +376,9 @@ func _physics_process(_delta: float) -> void:
 
 
 func _on_health_changed(new_health: int, max_health: int) -> void:
-	var bar := get_node_or_null("HUD/BottomBar/Bars/HealthBar") as ProgressBar
-	if bar:
-		bar.value = 100.0 * new_health / maxf(max_health, 1)
+	var hud := get_node_or_null("HUD")
+	if hud and hud.has_method("set_health"):
+		hud.set_health(100.0 * new_health / maxf(max_health, 1))
 
 
 func _on_father_died() -> void:
@@ -400,24 +388,6 @@ func _on_father_died() -> void:
 	if body and body.shape:
 		feet = (body.transform * body.shape.get_rect()).end.y
 	father.call("respawn", _checkpoint - Vector2(0, feet + 1))
-
-
-## Adds a "Soothe [X]" prompt to the HUD next to Jump / Slide / Crouch.
-func _add_soothe_prompt() -> void:
-	var jump := get_node_or_null("HUD/BottomBar/Controls/BasicControls/JumpPrompt") as Control
-	if jump == null:
-		return
-	var p := jump.duplicate() as Control
-	p.name = "SoothePrompt"
-	(p.get_node("Row/Label") as Label).text = "Soothe"
-	(p.get_node("Row/Glyph/Label") as Label).text = "X"
-	var glyph := p.get_node("Row/Glyph") as PanelContainer
-	var style := glyph.get_theme_stylebox("panel")
-	if style is StyleBoxFlat:
-		var blue := (style as StyleBoxFlat).duplicate() as StyleBoxFlat
-		blue.bg_color = Color(0.2, 0.45, 0.9)
-		glyph.add_theme_stylebox_override("panel", blue)
-	jump.get_parent().add_child(p)
 
 
 # --- The end (for now): past Room 6's exit door ---
