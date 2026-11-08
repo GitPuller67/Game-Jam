@@ -6,6 +6,7 @@ extends CharacterBody2D
 signal health_changed(new_health: int, max_health: int)
 signal died
 signal state_changed(new_state: State)
+signal shot
 
 
 # --- Enums ---
@@ -25,6 +26,11 @@ const GRAVITY: float = 980.0
 @export_group("Jumping")
 @export var jump_velocity: float = -400.0
 @export var max_jumps: int = 1
+## Coyote jump: after walking off a ledge you can still jump until you've
+## moved this many pixels sideways past where you left the ground...
+@export var coyote_distance: float = 8.0
+## ...or this many seconds have passed, whichever comes first.
+@export var coyote_time: float = 0.2
 
 @export_group("Slide")
 @export var slide_speed: float = 350.0
@@ -50,6 +56,10 @@ var can_slide: bool = true
 var is_invincible: bool = false
 var is_sliding: bool = false
 var is_crouching: bool = false
+# Coyote jump tracking
+var last_floor_x: float = 0.0
+var time_since_floor: float = 0.0
+var has_jumped: bool = false
 
 
 # --- @onready variables ---
@@ -72,6 +82,11 @@ var is_crouching: bool = false
 var current_ammo: int = 0
 
 # Aim
+@export_group("Aiming")
+## How far past straight up/down the aim must go before he turns around
+## (fraction of a fully sideways aim). Stops him flipping back and forth when
+## aiming straight up or down.
+@export_range(0.0, 0.5) var turn_threshold: float = 0.1
 var current_aim_angle: float = 0.0
 var is_using_controller: bool = false
 
@@ -106,8 +121,22 @@ func _process(delta: float) -> void:
 		var mouse_pos = get_global_mouse_position()
 		current_aim_angle = muzzle.global_position.direction_to(mouse_pos).angle()
 		
-	aim_laser.global_rotation = current_aim_angle	
+	aim_laser.global_rotation = current_aim_angle
+	_face_aim()	
 		
+## Turns the father to face the side he's aiming at. Measured from his center
+## (not the hand) so the hand moving when he turns can't flip him back.
+func _face_aim() -> void:
+	var aim_x: float
+	if is_using_controller:
+		aim_x = cos(current_aim_angle)
+	else:
+		aim_x = (get_global_mouse_position() - global_position).normalized().x
+	if absf(aim_x) > turn_threshold:
+		facing_direction = 1 if aim_x > 0.0 else -1
+		animated_sprite.flip_h = facing_direction < 0
+
+
 func shoot() -> void:
 	if current_ammo <= 0:
 		return
@@ -119,8 +148,11 @@ func shoot() -> void:
 	
 	new_bullet.global_position = muzzle.global_position
 	new_bullet.global_rotation = current_aim_angle
-	
+	new_bullet.shooter = self
+	new_bullet.mirrored = animated_sprite.flip_h
+
 	get_tree().current_scene.add_child(new_bullet)
+	shot.emit()
 
 # --- Built-in functions ---
 func _physics_process(delta: float) -> void:
@@ -137,17 +169,21 @@ func _physics_process(delta: float) -> void:
 			slide_timer.start(slide_duration)
 
 	# Handle jump.
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if is_on_floor():
+		last_floor_x = global_position.x
+		time_since_floor = 0.0
+		has_jumped = false
+	else:
+		time_since_floor += delta
+
+	if Input.is_action_just_pressed("jump") and can_jump():
 		velocity.y = jump_velocity
+		has_jumped = true
 
 	# Get the input direction: -1, 0, 1
 	var direction := Input.get_axis("move_left", "move_right")
 
-	# Flip the sprite
-	if direction > 0:
-		animated_sprite.flip_h = false
-	elif direction < 0:
-		animated_sprite.flip_h = true
+	# Facing follows the aim, not movement (see _face_aim).
 
 	# Play animations
 	if is_sliding:
@@ -170,3 +206,16 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, speed)
 
 	move_and_slide()
+
+
+## On the ground, or just walked off a ledge (falling, not from a jump, and
+## still within coyote_distance / coyote_time of where he left the ground).
+func can_jump() -> bool:
+	if is_on_floor():
+		return true
+	return (
+		not has_jumped
+		and velocity.y >= 0.0
+		and time_since_floor <= coyote_time
+		and absf(global_position.x - last_floor_x) <= coyote_distance
+	)
