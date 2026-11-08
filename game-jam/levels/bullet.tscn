@@ -111,7 +111,7 @@ speed = 200.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=143778641]
 sprite_frames = SubResource("SpriteFrames_scalpel")
-animation = &"spin"
+animation = &"impact"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=460346559]
 shape = SubResource("RectangleShape2D_scalpel")

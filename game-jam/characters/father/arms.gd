@@ -6,7 +6,9 @@ extends Node2D
 ##
 ## The body uses player_armless.png (player.png with the front forearm
 ## removed), and the aiming arm is player_arm.png drawn pointing right with the
-## shoulder pivot at pixel (2, 2).
+## shoulder pivot at pixel (2, 2). When he's out of ammo the aiming arm is
+## hidden and the body switches back to player.png, so the front arm goes back
+## to its drawn animation.
 
 
 # --- Constants ---
@@ -29,6 +31,9 @@ const DEFAULT_FRAME_SIZE := Vector2(35, 51)
 
 # --- Exported variables ---
 @export var father_sprite: AnimatedSprite2D
+## The body sheet without the front forearm, and the original with it.
+@export var armless_sheet: Texture2D = preload("res://assets/spritesheets/player_armless.png")
+@export var full_sheet: Texture2D = preload("res://assets/spritesheets/player.png")
 
 @export_group("Held scalpel")
 ## Distance from the shoulder pivot to the hand along the arm.
@@ -42,6 +47,8 @@ const DEFAULT_FRAME_SIZE := Vector2(35, 51)
 
 # --- Regular variables ---
 var _rearm_left: float = 0.0
+var _armed_frames: SpriteFrames
+var _unarmed_frames: SpriteFrames
 
 
 # --- @onready variables ---
@@ -53,9 +60,15 @@ var _rearm_left: float = 0.0
 # --- Built-in functions ---
 func _ready() -> void:
 	father.shot.connect(func() -> void: _rearm_left = rearm_time)
+	_armed_frames = father_sprite.sprite_frames
+	_unarmed_frames = _with_sheet_swapped(_armed_frames, armless_sheet, full_sheet)
 
 
 func _process(delta: float) -> void:
+	var armed := father.current_ammo > 0
+	_set_body_frames(_armed_frames if armed else _unarmed_frames)
+	front_arm.visible = armed
+
 	var flipped := father_sprite.flip_h
 	front_arm.position = _shoulder_position(FRONT_SHOULDER_X, flipped)
 
@@ -68,6 +81,34 @@ func _process(delta: float) -> void:
 
 
 # --- Helpers ---
+## A copy of the father's animations with every frame cut from `from` re-cut from `to`.
+func _with_sheet_swapped(frames: SpriteFrames, from: Texture2D, to: Texture2D) -> SpriteFrames:
+	var copy := frames.duplicate() as SpriteFrames
+	for anim in copy.get_animation_names():
+		for i in copy.get_frame_count(anim):
+			var atlas := copy.get_frame_texture(anim, i) as AtlasTexture
+			if atlas and atlas.atlas == from:
+				var swapped := atlas.duplicate() as AtlasTexture
+				swapped.atlas = to
+				copy.set_frame(anim, i, swapped, copy.get_frame_duration(anim, i))
+	return copy
+
+
+## Switches the father's animations without restarting the one that's playing.
+func _set_body_frames(frames: SpriteFrames) -> void:
+	if father_sprite.sprite_frames == frames:
+		return
+	var anim := father_sprite.animation
+	var frame := father_sprite.frame
+	var progress := father_sprite.frame_progress
+	var playing := father_sprite.is_playing()
+	father_sprite.sprite_frames = frames
+	father_sprite.animation = anim
+	if playing:
+		father_sprite.play(anim)
+	father_sprite.set_frame_and_progress(frame, progress)
+
+
 ## Puts a scalpel sideways in the aiming hand (perpendicular to the arm, blade
 ## up, cutting edge forward) and moves the father's Muzzle onto it so thrown
 ## scalpels leave from the hand.
