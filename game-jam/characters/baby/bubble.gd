@@ -24,6 +24,8 @@ var time_mode: TimeMode = TimeMode.NORMAL
 var time_affected: Array[Interactable] = []
 ## Interactables currently being rewound (Y held).
 var rewinding: Array[Interactable] = []
+## While Y is held the bubble locks onto this (the thing being rewound) and follows it.
+var rewind_anchor: Interactable = null
 
 @export_group("Time control")
 ## Time factor with the stick pushed fully left (0.15 = 15% speed).
@@ -65,6 +67,12 @@ func _process(delta: float) -> void:
 
 
 func _move(delta: float) -> void:
+	# Rewinding: stay locked onto what's being rewound until Y is let go.
+	if is_instance_valid(rewind_anchor):
+		global_position = rewind_anchor.global_position
+		_stick_velocity = Vector2.ZERO
+		return
+
 	# Speed follows how far the stick is pushed (dynamic), with a little acceleration.
 	var dir := Input.get_vector("bubble_left", "bubble_right", "bubble_up", "bubble_down")
 	var target_velocity := Vector2.ZERO
@@ -124,6 +132,16 @@ func _update_rewind() -> void:
 				target.reset_time()
 			rewinding.append(target)
 			target.start_rewind()
+	# Lock onto the rewinding thing nearest the bubble.
+	if not is_instance_valid(rewind_anchor) or not rewinding.has(rewind_anchor):
+		rewind_anchor = null
+		var best := INF
+		for target in rewinding:
+			if is_instance_valid(target):
+				var d := global_position.distance_squared_to(target.global_position)
+				if d < best:
+					best = d
+					rewind_anchor = target
 
 
 func _stop_all_rewind() -> void:
@@ -131,6 +149,7 @@ func _stop_all_rewind() -> void:
 		if is_instance_valid(target):
 			target.stop_rewind()
 	rewinding.clear()
+	rewind_anchor = null
 
 
 func _reset_all_time() -> void:
@@ -152,7 +171,8 @@ func _on_target_exited(node: Node2D) -> void:
 	if target == null:
 		return
 	hovered.erase(target)
-	if rewinding.has(target):
+	# Still holding Y: keep rewinding it even if it slips out of the bubble.
+	if rewinding.has(target) and not Input.is_action_pressed("bubble_rewind_time"):
 		rewinding.erase(target)
 		target.stop_rewind()
 	# Left the bubble: it goes back to normal speed.

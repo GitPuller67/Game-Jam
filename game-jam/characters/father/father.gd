@@ -68,6 +68,8 @@ var has_jumped: bool = false
 var time_scale: float = 1.0
 ## The bubble hovers over this to control his time / rewind him.
 var time_handle: TimeSlowTarget
+## Fastest the baby can speed him up (the stick goes up to 2.5x for everything else).
+@export var max_time_boost: float = 1.5
 
 
 # --- @onready variables ---
@@ -221,6 +223,7 @@ func _add_time_handle() -> void:
 	box.size = Vector2(24, 46)
 	var nodes: Array[Node] = [self]
 	time_handle = TimeSlowTarget.make(self, box, Vector2(0, 2), nodes, visuals)
+	time_handle.max_factor = max_time_boost
 	time_handle.add_rewind(self, PackedStringArray(["global_position", "velocity", "facing_direction"]))
 
 

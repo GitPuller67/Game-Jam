@@ -29,6 +29,12 @@ var has_hit: bool = false
 ## 1.0 = normal speed; set by slow_down_time() / reset_time().
 var time_scale: float = 1.0
 var _rewinder: Rewinder
+## Speed boost from the baby (1 = none). Kept after leaving the bubble.
+var boost: float = 1.0
+## Fastest a boosted scalpel can go (x its normal speed).
+@export var max_boost: float = 2.5
+## Tint while boosted.
+@export var boosted_tint: Color = Color(1.25, 0.9, 0.6)
 var _rewinding: bool = false
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -94,14 +100,27 @@ func slow_down_time() -> void:
 
 
 func reset_time() -> void:
-	time_scale = 1.0
-	modulate = Color.WHITE
+	time_scale = boost   # 1.0 unless it was sped up, which it keeps
+	_update_tint()
 
 
-## Dynamic: slows down the further the stick is pushed left; pushing right doesn't speed it up.
+## Dynamic: the further the stick is pushed, the slower / faster it flies.
+## Speeding up sticks: once boosted it keeps its fastest speed even after it leaves the bubble
+## or the stick is let go. Slowing only lasts while it's in the bubble.
 func set_time_factor(factor: float) -> void:
-	time_scale = clampf(factor, 0.0, 1.0)
-	modulate = Color.WHITE.lerp(slowed_tint, clampf((1.0 - time_scale) / 0.75, 0.0, 1.0))
+	if factor >= 1.0:
+		boost = maxf(boost, minf(factor, max_boost))
+		time_scale = boost
+	else:
+		time_scale = factor
+	_update_tint()
+
+
+func _update_tint() -> void:
+	if time_scale < 1.0:
+		modulate = Color.WHITE.lerp(slowed_tint, clampf((1.0 - time_scale) / 0.75, 0.0, 1.0))
+	else:
+		modulate = Color.WHITE.lerp(boosted_tint, clampf(time_scale - 1.0, 0.0, 1.0))
 
 
 func can_rewind() -> bool:
@@ -119,4 +138,4 @@ func start_rewind() -> void:
 func stop_rewind() -> void:
 	_rewinding = false
 	_rewinder.stop()
-	modulate = Color.WHITE
+	_update_tint()

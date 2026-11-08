@@ -15,6 +15,9 @@ signal restored
 ## Used by slow_down_time() / speed_up_time() (fixed amounts, for anything that still calls them).
 @export var slow_factor := 0.25
 @export var speed_factor := 2.0
+## Limits on how far the stick can push this one (e.g. the Father is capped so he stays playable).
+@export var min_factor := 0.0
+@export var max_factor := 100.0
 ## Unused since slowing became hold-to-slow; kept so existing levels that set it still load.
 @export var slow_duration := 4.0
 ## Tinted while affected so the player can see it working (blue = slow, orange = fast, purple = rewind).
@@ -39,6 +42,7 @@ func _ready() -> void:
 func set_time_factor(factor: float) -> void:
 	if is_rewinding:
 		return
+	factor = clampf(factor, min_factor, max_factor)
 	if not is_slowed:
 		is_slowed = true
 		for t in targets:
