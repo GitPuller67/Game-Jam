@@ -9,6 +9,8 @@ extends Node2D
 
 @export var slow_factor := 0.25
 @export var slow_duration := 4.0
+## Room 1's door code. The ghost replay types it forwards; the player must enter it backwards.
+@export var door_code := "4719"
 ## Overrides the Father camera's zoom in this level (his scene uses 5).
 @export var camera_zoom := 3.0
 ## How quickly the camera's top/bottom limits follow the room heights (higher = snappier).
@@ -39,6 +41,7 @@ func _ready() -> void:
 	_hook_hazards()
 	_add_room4_trigger()
 	_setup_health()
+	_setup_energy()
 
 
 func _process(delta: float) -> void:
@@ -216,7 +219,19 @@ func _setup_room1() -> void:
 
 	var keypad := r1.get_node("Keypad") as AnimatedSprite2D
 	var exit_door := r1.get_node("ExitDoor")
+	# a time-echo of a scientist types the code, over and over
+	var replay := CodeReplay.new()
+	replay.name = "CodeReplay"
+	replay.code = door_code
+	replay.keypad = keypad
+	r1.add_child(replay)
+	# the keypad screen (type the code backwards)
+	var ui := KeypadUI.new()
+	ui.name = "KeypadUI"
+	ui.code = door_code
+	add_child(ui)
 	var btn := BubbleButton.new()
+	btn.one_shot = false
 	btn.name = "KeypadButton"
 	btn.position = keypad.position + Vector2(5, 7)
 	var bcs := CollisionShape2D.new()
@@ -226,7 +241,11 @@ func _setup_room1() -> void:
 	btn.add_child(bcs)
 	r1.add_child(btn)
 	btn.pressed.connect(func() -> void:
+		if not exit_door.get("is_open"):
+			ui.open())
+	ui.solved.connect(func() -> void:
 		keypad.play("unlocked")
+		replay.stop()
 		exit_door.call("open"))
 
 
@@ -242,6 +261,20 @@ const CHECKPOINTS := [
 	[3808.0, Vector2(3830, 64)],    # Room 6
 ]
 var _checkpoint := Vector2(40, 0)
+
+
+func _setup_energy() -> void:
+	var bubble := father.find_child("Bubble", true, false)
+	if bubble and bubble.has_signal("energy_changed"):
+		bubble.connect("energy_changed", _on_energy_changed)
+
+
+func _on_energy_changed(value: float, max_value: float) -> void:
+	var bar := get_node_or_null("HUD/BottomBar/Bars/BabyEnergyBar") as ProgressBar
+	if bar:
+		bar.value = 100.0 * value / maxf(max_value, 1.0)
+		var bubble := father.find_child("Bubble", true, false)
+		bar.modulate = Color(1, 0.55, 0.55) if bubble and bubble.get("exhausted") else Color.WHITE
 
 
 func _setup_health() -> void:

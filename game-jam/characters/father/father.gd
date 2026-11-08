@@ -224,6 +224,7 @@ func _add_time_handle() -> void:
 	var nodes: Array[Node] = [self]
 	time_handle = TimeSlowTarget.make(self, box, Vector2(0, 2), nodes, visuals)
 	time_handle.max_factor = max_time_boost
+	time_handle.set_meta(&"is_player", true)   # the bubble prefers rewinding other things over him
 	time_handle.add_rewind(self, PackedStringArray(["global_position", "velocity", "facing_direction"]))
 
 

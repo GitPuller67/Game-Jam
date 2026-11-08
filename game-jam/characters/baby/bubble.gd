@@ -26,6 +26,26 @@ var time_affected: Array[Interactable] = []
 var rewinding: Array[Interactable] = []
 ## While Y is held the bubble locks onto this (the thing being rewound) and follows it.
 var rewind_anchor: Interactable = null
+## Y has to be held this long before rewinding starts (so a quick tap only presses keypads).
+@export var rewind_hold_delay: float = 0.15
+var _rewind_hold := 0.0
+
+@export_group("Energy")
+## The baby's energy (HUD "Baby energy" bar). Time powers use it up; it refills when they're not in use.
+@export var max_energy: float = 100.0
+## Per second while slowing / speeding something (scaled by how far the stick is pushed).
+@export var time_drain: float = 22.0
+## Per second while rewinding.
+@export var rewind_drain: float = 30.0
+@export var energy_regen: float = 18.0
+## Seconds after the last use before it starts refilling.
+@export var regen_delay: float = 0.6
+## After running dry, powers stay off until it has refilled to this much.
+@export var restart_energy: float = 25.0
+signal energy_changed(energy: float, max_energy: float)
+var energy: float = 100.0
+var exhausted := false
+var _regen_wait := 0.0
 
 @export_group("Time control")
 ## Time factor with the stick pushed fully left (0.15 = 15% speed).
@@ -41,6 +61,7 @@ var time_factor: float = 1.0
 
 
 func _ready() -> void:
+	energy = max_energy
 	area_entered.connect(_on_target_entered)
 	area_exited.connect(_on_target_exited)
 	body_entered.connect(_on_target_entered)
@@ -62,7 +83,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	_move(delta)
-	_update_time_control()
+	_update_time_control(delta)
+	_update_energy(delta)
 	animated_sprite.play("hover" if not hovered.is_empty() else "default")
 
 
@@ -91,11 +113,11 @@ func _move(delta: float) -> void:
 
 
 # --- Time control ---
-func _update_time_control() -> void:
-	_update_rewind()
+func _update_time_control(delta: float) -> void:
+	_update_rewind(delta)
 
 	var axis := Input.get_axis("bubble_slow_time", "bubble_speed_time")
-	if absf(axis) < time_deadzone:
+	if exhausted or absf(axis) < time_deadzone:
 		if time_mode != TimeMode.NORMAL:
 			_reset_all_time()
 			time_mode = TimeMode.NORMAL
@@ -121,27 +143,39 @@ func _update_time_control() -> void:
 
 
 # --- Rewind (hold Y) ---
-func _update_rewind() -> void:
-	if not Input.is_action_pressed("bubble_rewind_time"):
+func _update_rewind(delta: float) -> void:
+	if exhausted or not Input.is_action_pressed("bubble_rewind_time"):
+		_rewind_hold = 0.0
 		_stop_all_rewind()
 		return
+	_rewind_hold += delta
+	if _rewind_hold < rewind_hold_delay or not rewinding.is_empty():
+		return   # already locked onto something: nothing else joins until Y is let go
+	# Pick ONE thing to rewind: the nearest non-player thing in the bubble; the Father only if
+	# he's the only rewindable thing there (so walking into the bubble doesn't rewind him too).
+	var pick: Interactable = null
+	var player: Interactable = null
+	var best := INF
 	for target in hovered:
-		if is_instance_valid(target) and not rewinding.has(target) and target.can_rewind():
-			if time_affected.has(target):
-				time_affected.erase(target)
-				target.reset_time()
-			rewinding.append(target)
-			target.start_rewind()
-	# Lock onto the rewinding thing nearest the bubble.
-	if not is_instance_valid(rewind_anchor) or not rewinding.has(rewind_anchor):
-		rewind_anchor = null
-		var best := INF
-		for target in rewinding:
-			if is_instance_valid(target):
-				var d := global_position.distance_squared_to(target.global_position)
-				if d < best:
-					best = d
-					rewind_anchor = target
+		if not is_instance_valid(target) or not target.can_rewind():
+			continue
+		if target.has_meta(&"is_player"):
+			player = target
+			continue
+		var d := global_position.distance_squared_to(target.global_position)
+		if d < best:
+			best = d
+			pick = target
+	if pick == null:
+		pick = player
+	if pick == null:
+		return
+	if time_affected.has(pick):
+		time_affected.erase(pick)
+		pick.reset_time()
+	rewinding.append(pick)
+	rewind_anchor = pick
+	pick.start_rewind()
 
 
 func _stop_all_rewind() -> void:
@@ -179,3 +213,34 @@ func _on_target_exited(node: Node2D) -> void:
 	if time_affected.has(target):
 		time_affected.erase(target)
 		target.reset_time()
+
+
+# --- Energy ---
+func _update_energy(delta: float) -> void:
+	var before := energy
+	var drain := 0.0
+	if not rewinding.is_empty():
+		drain = rewind_drain
+	elif not time_affected.is_empty():
+		# stronger effects cost more: how far time is pushed from normal
+		var strength := absf(log(time_factor)) / log(1.0 / min_time_factor) if time_factor < 1.0 \
+			else log(time_factor) / log(max_time_factor)
+		drain = time_drain * clampf(0.35 + 0.65 * strength, 0.35, 1.0)
+	if drain > 0.0:
+		energy = maxf(energy - drain * delta, 0.0)
+		_regen_wait = regen_delay
+		if energy <= 0.0 and not exhausted:
+			exhausted = true
+			_reset_all_time()
+			_stop_all_rewind()
+			time_mode = TimeMode.NORMAL
+			time_factor = 1.0
+	else:
+		_regen_wait -= delta
+		if _regen_wait <= 0.0:
+			energy = minf(energy + energy_regen * delta, max_energy)
+	if exhausted and energy >= restart_energy:
+		exhausted = false
+	modulate = Color(0.6, 0.6, 0.65, 0.7) if exhausted else Color.WHITE
+	if energy != before:
+		energy_changed.emit(energy, max_energy)
