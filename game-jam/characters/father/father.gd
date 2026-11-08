@@ -25,6 +25,11 @@ const GRAVITY: float = 980.0
 @export_group("Jumping")
 @export var jump_velocity: float = -400.0
 @export var max_jumps: int = 1
+## Coyote jump: after walking off a ledge you can still jump until you've
+## moved this many pixels sideways past where you left the ground...
+@export var coyote_distance: float = 8.0
+## ...or this many seconds have passed, whichever comes first.
+@export var coyote_time: float = 0.2
 
 @export_group("Slide")
 @export var slide_speed: float = 350.0
@@ -50,6 +55,10 @@ var can_slide: bool = true
 var is_invincible: bool = false
 var is_sliding: bool = false
 var is_crouching: bool = false
+# Coyote jump tracking
+var last_floor_x: float = 0.0
+var time_since_floor: float = 0.0
+var has_jumped: bool = false
 
 
 # --- @onready variables ---
@@ -137,8 +146,16 @@ func _physics_process(delta: float) -> void:
 			slide_timer.start(slide_duration)
 
 	# Handle jump.
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if is_on_floor():
+		last_floor_x = global_position.x
+		time_since_floor = 0.0
+		has_jumped = false
+	else:
+		time_since_floor += delta
+
+	if Input.is_action_just_pressed("jump") and can_jump():
 		velocity.y = jump_velocity
+		has_jumped = true
 
 	# Get the input direction: -1, 0, 1
 	var direction := Input.get_axis("move_left", "move_right")
@@ -170,3 +187,16 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, speed)
 
 	move_and_slide()
+
+
+## On the ground, or just walked off a ledge (falling, not from a jump, and
+## still within coyote_distance / coyote_time of where he left the ground).
+func can_jump() -> bool:
+	if is_on_floor():
+		return true
+	return (
+		not has_jumped
+		and velocity.y >= 0.0
+		and time_since_floor <= coyote_time
+		and absf(global_position.x - last_floor_x) <= coyote_distance
+	)
