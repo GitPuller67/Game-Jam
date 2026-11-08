@@ -8,7 +8,7 @@ extends Node2D
 @export var slow_factor := 0.25
 @export var slow_duration := 4.0
 ## Overrides the Father camera's zoom in this level (his scene uses 5).
-@export var camera_zoom := 4.0
+@export var camera_zoom := 3.0
 
 @onready var map: Node2D = $Map
 @onready var father: Node2D = $Father
