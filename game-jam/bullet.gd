@@ -2,8 +2,11 @@ class_name Bullet
 extends Interactable
 
 ## A thrown scalpel. Spins while it flies, then plays the impact burst and
-## disappears when it hits a body (walls, floors, enemies). Ignores whoever
-## threw it. The baby can slow it down by hovering the bubble over it and holding
+## disappears when it hits a body (walls, floors, enemies) or an enemy's shield
+## (which only a sped-up scalpel can break, see EnemyShield). Ignores whoever
+## threw it; scalpels thrown by enemies also ignore other enemies.
+## While the baby rewinds it, it flies back the way it came and keeps going past the
+## thrower's hand, hitting any enemy in the way (including whoever threw it) but never the Father. The baby can slow it down by hovering the bubble over it and holding
 ## the right stick left (speeding it up makes no sense, so speed_up_time() isn't overridden).
 
 signal hit(body: Node2D)
@@ -23,6 +26,9 @@ const HELD_FRAME: int = 6
 
 ## Set by the thrower so the scalpel doesn't hit them as it leaves the hand.
 var shooter: Node2D
+## Spin frame it starts on, to match how the thrower held it (enemies hold it flat: frame 0).
+var start_frame: int = HELD_FRAME
+var _thrown_by_enemy: bool = false
 ## True when thrown by someone facing left; mirrors the scalpel to match the hand.
 var mirrored: bool = false
 var has_hit: bool = false
@@ -43,12 +49,14 @@ var _rewinding: bool = false
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
+	area_entered.connect(_on_area_entered)
+	_thrown_by_enemy = shooter is Enemy
 	animated_sprite.animation_finished.connect(_on_animation_finished)
 	# Thrown facing left: mirror it so it leaves the hand the same way up as it was held.
 	animated_sprite.flip_v = mirrored
 	animated_sprite.play("spin")
-	# The father holds it sideways (blade up), so start the spin on the blade-up frame.
-	animated_sprite.frame = HELD_FRAME
+	# Start the spin on the frame matching how it was held (the father holds it blade up).
+	animated_sprite.frame = start_frame
 	get_tree().create_timer(lifetime, false).timeout.connect(_on_lifetime_timeout)
 	_rewinder = Rewinder.new()
 	_rewinder.target = self
@@ -59,6 +67,12 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if has_hit:
 		return # stay where it hit while the impact plays
+	if _rewinding:
+		# The Rewinder plays its path back; once that runs out (back at the hand that threw it),
+		# keep flying backwards at the same rewind speed so it can be sent into the thrower.
+		if _rewinder.is_exhausted():
+			position -= transform.x * speed * maxf(boost, 1.0) * _rewinder.rewind_rate * delta
+		return
 	position += transform.x * speed * time_scale * delta
 
 
@@ -68,16 +82,50 @@ func _on_visible_on_screen_notifier_2d_screen_exited() -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	if has_hit or body == shooter:
+	# An enemy still behind its shield (e.g. thrown from inside the dome): the shield takes it.
+	if body is Enemy and body.shield and body.shield.active:
+		_on_area_entered(body.shield)
 		return
+	if not _can_hit(body):
+		return
+	_impact()
+	if body.has_method("take_damage"):
+		body.call("take_damage", damage, global_position)
+	hit.emit(body)
+
+
+func _on_area_entered(area: Area2D) -> void:
+	var shield := area as EnemyShield
+	if not shield or not shield.active or not _can_hit(shield):
+		return
+	_impact()
+	shield.hit_by(self)
+	hit.emit(shield)
+
+
+func _can_hit(node: Node2D) -> bool:
+	if has_hit:
+		return false
+	if _rewinding:
+		return not (node is Father)   # the baby's attack now: anything but the Father
+	if node == shooter:
+		return false
+	if _thrown_by_enemy and (node is Enemy or node is EnemyShield):
+		return false   # enemies don't hit each other (or their own shield)
+	return true
+
+
+## Stop where it hit and play the impact burst.
+func _impact() -> void:
 	has_hit = true
+	if _rewinding:   # hit something mid-rewind: stop the playback so it stays where it hit
+		_rewinding = false
+		_rewinder.stop()
+		_update_tint()
 	collision_shape.set_deferred("disabled", true)
 	animated_sprite.flip_v = false
 	animated_sprite.global_rotation = 0.0
 	animated_sprite.play("impact")
-	if body.has_method("take_damage"):
-		body.call("take_damage", damage, global_position)
-	hit.emit(body)
 
 
 func _on_animation_finished() -> void:

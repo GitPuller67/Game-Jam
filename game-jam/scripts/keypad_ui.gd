@@ -1,7 +1,7 @@
 class_name KeypadUI
 extends CanvasLayer
 ## Full-screen keypad for Room 1's security door. The code has to be typed in BACKWARDS
-## (the ghost replay in the room shows it being typed forwards).
+## (the doctor types it out of sight; rewinding him shows it backwards, see KeypadDoctor).
 ## Navigate with the d-pad / left stick (either controller), press with A, controller 2's Y or a
 ## mouse click. * clears, # submits (it also checks automatically after the last digit).
 ## B / Esc closes it. The game is paused while it's open.

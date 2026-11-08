@@ -105,6 +105,7 @@ animations = [{
 size = Vector2(16, 4)
 
 [node name="Bullet" type="Area2D" unique_id=2027033426]
+collision_mask = 9
 script = ExtResource("1_wpoqv")
 speed = 200.0
 

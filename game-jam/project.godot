@@ -120,6 +120,7 @@ aim_down={
 
 2d_physics/layer_1="world"
 2d_physics/layer_2="hazard"
+2d_physics/layer_4="shield"
 
 [physics]
 

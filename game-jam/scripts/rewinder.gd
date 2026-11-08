@@ -46,6 +46,11 @@ func _physics_process(_delta: float) -> void:
 			_history.pop_front()
 
 
+## True while rewinding with nothing left to play back (it's back where recording started).
+func is_exhausted() -> bool:
+	return rewinding and _history.is_empty()
+
+
 func start() -> void:
 	if rewinding or not is_instance_valid(target):
 		return

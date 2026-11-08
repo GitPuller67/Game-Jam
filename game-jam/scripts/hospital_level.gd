@@ -9,7 +9,8 @@ extends Node2D
 
 @export var slow_factor := 0.25
 @export var slow_duration := 4.0
-## Room 1's door code. The ghost replay types it forwards; the player must enter it backwards.
+## Room 1's door code. The doctor types it forwards; the player must enter it backwards
+## (rewinding the doctor shows it in that order).
 @export var door_code := "4719"
 ## Overrides the Father camera's zoom in this level (his scene uses 5).
 @export var camera_zoom := 3.0
@@ -138,7 +139,11 @@ func _add_time_targets() -> void:
 	# the enemy can be slowed, sped up and rewound too
 	var enemy := get_node_or_null("Enemy") as Node2D
 	if enemy:
-		_target(enemy, _rect(Vector2(20, 48)), Vector2(0, -12), [enemy], enemy.get_node("AnimatedSprite2D")) 			.add_rewind(enemy, PackedStringArray(["global_position", "velocity"]))
+		_enemy_time_target(enemy)
+
+
+func _enemy_time_target(enemy: Node2D) -> void:
+	_target(enemy, _rect(Vector2(20, 48)), Vector2(0, -12), [enemy], enemy.get_node("AnimatedSprite2D")) 		.add_rewind(enemy, PackedStringArray(["global_position", "velocity"]))
 
 
 func _target(parent: Node, shape: Shape2D, offset: Vector2, what: Array, tint: CanvasItem) -> TimeSlowTarget:
@@ -219,12 +224,15 @@ func _setup_room1() -> void:
 
 	var keypad := r1.get_node("Keypad") as AnimatedSprite2D
 	var exit_door := r1.get_node("ExitDoor")
-	# a time-echo of a scientist types the code, over and over
-	var replay := CodeReplay.new()
-	replay.name = "CodeReplay"
-	replay.code = door_code
-	replay.keypad = keypad
-	r1.add_child(replay)
+	# a doctor walks up, types the code and leaves through the door; rewind him to see it again
+	var doctor := KeypadDoctor.new()
+	doctor.name = "KeypadDoctorScene"
+	doctor.code = door_code
+	doctor.keypad = keypad
+	doctor.door = exit_door
+	r1.add_child(doctor)
+	# once he's after the Father he's a normal enemy: slow / speed up / rewind him like the others
+	doctor.turned_hostile.connect(_enemy_time_target)
 	# the keypad screen (type the code backwards)
 	var ui := KeypadUI.new()
 	ui.name = "KeypadUI"
@@ -245,7 +253,7 @@ func _setup_room1() -> void:
 			ui.open())
 	ui.solved.connect(func() -> void:
 		keypad.play("unlocked")
-		replay.stop()
+		doctor.turn_hostile()   # the door opening gives the Father away
 		exit_door.call("open"))
 
 
