@@ -170,7 +170,8 @@ sprite_frames = SubResource("SpriteFrames_at4b5")
 animation = &"slide"
 autoplay = "default"
 
-[node name="Baby" parent="Visuals" unique_id=1142126627 instance=ExtResource("2_paef7")]
+[node name="Baby" parent="Visuals" unique_id=1142126627 node_paths=PackedStringArray("father_sprite") instance=ExtResource("2_paef7")]
+father_sprite = NodePath("../AnimatedSprite2D")
 
 [node name="Muzzle" type="Marker2D" parent="." unique_id=631803531]
 
