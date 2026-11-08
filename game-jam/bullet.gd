@@ -46,11 +46,9 @@ func _physics_process(delta: float) -> void:
 	position += transform.x * speed * time_scale * delta
 
 
-func _on_visible_on_screen_notifier_2d_screen_exited(delta: float) -> void:
-	queue_free() # Replace with function body.
-
-	if not has_hit:
-		position += transform.x * speed * delta
+## Thrown off screen: remove it (screen_exited sends no arguments).
+func _on_visible_on_screen_notifier_2d_screen_exited() -> void:
+	queue_free()
 
 
 func _on_body_entered(body: Node2D) -> void:
