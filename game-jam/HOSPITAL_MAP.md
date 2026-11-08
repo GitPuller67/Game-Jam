@@ -35,10 +35,10 @@ gameplay goes; notes are hidden when the game runs.
 `godot --headless --path . --script res://tools/build_map.gd`
 
 ## Playing it with the real characters – `levels/hospital_level.tscn`
-Open `levels/hospital_level.tscn` and press **F6** (run current scene). It is the map plus the Father (with Baby + bubble),
-an Enemy in Room 3, the HUD and the main menu. `levels/game.tscn` is untouched.
+`levels/hospital_level.tscn` is the game's main scene, so **F5** runs it. It is the map plus the Father (with Baby + bubble),
+an Enemy in Room 3, the HUD and the main menu. The Father starts on the `PlayerStart` marker in Room 1.
 - **Time power:** hover the bubble over the swinging lamp, the lift, a Room 4 column, a Room 5 floating object or the
-  Room 6 clock and press interact – it runs at 25% speed for 4 s (tinted blue). See `scripts/time_slow_target.gd`.
+  Room 6 clock and hold controller 2's right stick left – it runs at 25% speed while held (tinted blue). See `scripts/time_slow_target.gd`.
 - **Room 4:** the columns start breaking when the Father walks in (`start_breaking()`).
 - **Room 5 hazards** call `take_damage(1)` on the Father once he has that method.
 - The map's free-look camera removes itself inside a level, so the Father's camera is used.

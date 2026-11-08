@@ -1,10 +1,15 @@
 [gd_scene format=3 uid="uid://bv1eyr1ng8pl7"]
 
+[ext_resource type="Texture2D" path="res://assets/ui/controller_icons/l_stick_all.png" id="icon_l_stick_all"]
+[ext_resource type="Texture2D" path="res://assets/ui/controller_icons/r_stick_left.png" id="icon_r_stick_left"]
+[ext_resource type="Texture2D" path="res://assets/ui/controller_icons/r_stick_right.png" id="icon_r_stick_right"]
+[ext_resource type="Texture2D" path="res://assets/ui/controller_icons/y.png" id="icon_y"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill_weapon"]
-content_margin_left = 10.0
-content_margin_top = 4.0
-content_margin_right = 10.0
-content_margin_bottom = 4.0
+content_margin_left = 7.0
+content_margin_top = 3.0
+content_margin_right = 7.0
+content_margin_bottom = 3.0
 bg_color = Color(0.133, 0.192, 0.306, 1)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
@@ -19,10 +24,10 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill"]
-content_margin_left = 10.0
-content_margin_top = 4.0
-content_margin_right = 10.0
-content_margin_bottom = 4.0
+content_margin_left = 7.0
+content_margin_top = 3.0
+content_margin_right = 7.0
+content_margin_bottom = 3.0
 bg_color = Color(0.169, 0.169, 0.169, 1)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
@@ -96,162 +101,162 @@ corner_radius_bottom_left = 8
 
 [node name="HUD" type="CanvasLayer" unique_id=1873402219]
 
-[node name="Controls" type="VBoxContainer" parent="." unique_id=402118734]
-anchors_preset = 2
+[node name="BottomBar" type="HBoxContainer" parent="."]
+anchors_preset = 12
 anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -44.0
-offset_right = 256.0
+offset_top = -58.0
+offset_right = -16.0
 offset_bottom = -16.0
+grow_horizontal = 2
 grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Controls" type="VBoxContainer" parent="BottomBar" unique_id=402118734]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 8
 mouse_filter = 2
 theme_override_constants/separation = 8
 alignment = 2
 
-[node name="ShootPrompt" type="PanelContainer" parent="Controls" unique_id=1209847551]
+[node name="ShootPrompt" type="PanelContainer" parent="BottomBar/Controls" unique_id=1209847551]
 visible = false
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 size_flags_horizontal = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pill_weapon")
 
-[node name="Row" type="HBoxContainer" parent="Controls/ShootPrompt" unique_id=733920184]
+[node name="Row" type="HBoxContainer" parent="BottomBar/Controls/ShootPrompt" unique_id=733920184]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 5
 
-[node name="Label" type="Label" parent="Controls/ShootPrompt/Row" unique_id=1564003921]
+[node name="Label" type="Label" parent="BottomBar/Controls/ShootPrompt/Row" unique_id=1564003921]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 11
 text = "Shoot"
 vertical_alignment = 1
 
-[node name="Glyph" type="PanelContainer" parent="Controls/ShootPrompt/Row" unique_id=298811470]
-custom_minimum_size = Vector2(18, 16)
+[node name="Glyph" type="PanelContainer" parent="BottomBar/Controls/ShootPrompt/Row" unique_id=298811470]
+custom_minimum_size = Vector2(16, 14)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_glyph_trigger")
 
-[node name="Label" type="Label" parent="Controls/ShootPrompt/Row/Glyph" unique_id=1950372718]
+[node name="Label" type="Label" parent="BottomBar/Controls/ShootPrompt/Row/Glyph" unique_id=1950372718]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.13, 0.16, 1)
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 7
 text = "RT"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BasicControls" type="HBoxContainer" parent="Controls" unique_id=1688204013]
+[node name="BasicControls" type="HBoxContainer" parent="BottomBar/Controls" unique_id=1688204013]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="SlidePrompt" type="PanelContainer" parent="Controls/BasicControls" unique_id=845527391]
-custom_minimum_size = Vector2(0, 28)
+[node name="SlidePrompt" type="PanelContainer" parent="BottomBar/Controls/BasicControls" unique_id=845527391]
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
-[node name="Row" type="HBoxContainer" parent="Controls/BasicControls/SlidePrompt" unique_id=1331590846]
+[node name="Row" type="HBoxContainer" parent="BottomBar/Controls/BasicControls/SlidePrompt" unique_id=1331590846]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 5
 
-[node name="Label" type="Label" parent="Controls/BasicControls/SlidePrompt/Row" unique_id=96421835]
+[node name="Label" type="Label" parent="BottomBar/Controls/BasicControls/SlidePrompt/Row" unique_id=96421835]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 11
 text = "Slide"
 vertical_alignment = 1
 
-[node name="Glyph" type="PanelContainer" parent="Controls/BasicControls/SlidePrompt/Row" unique_id=1744932606]
-custom_minimum_size = Vector2(16, 16)
+[node name="Glyph" type="PanelContainer" parent="BottomBar/Controls/BasicControls/SlidePrompt/Row" unique_id=1744932606]
+custom_minimum_size = Vector2(14, 14)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_glyph_b")
 
-[node name="Label" type="Label" parent="Controls/BasicControls/SlidePrompt/Row/Glyph" unique_id=1110236587]
+[node name="Label" type="Label" parent="BottomBar/Controls/BasicControls/SlidePrompt/Row/Glyph" unique_id=1110236587]
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 8
 text = "B"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="JumpPrompt" type="PanelContainer" parent="Controls/BasicControls" unique_id=1597012264]
-custom_minimum_size = Vector2(0, 28)
+[node name="JumpPrompt" type="PanelContainer" parent="BottomBar/Controls/BasicControls" unique_id=1597012264]
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
-[node name="Row" type="HBoxContainer" parent="Controls/BasicControls/JumpPrompt" unique_id=520866193]
+[node name="Row" type="HBoxContainer" parent="BottomBar/Controls/BasicControls/JumpPrompt" unique_id=520866193]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 5
 
-[node name="Label" type="Label" parent="Controls/BasicControls/JumpPrompt/Row" unique_id=1873116452]
+[node name="Label" type="Label" parent="BottomBar/Controls/BasicControls/JumpPrompt/Row" unique_id=1873116452]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 11
 text = "Jump"
 vertical_alignment = 1
 
-[node name="Glyph" type="PanelContainer" parent="Controls/BasicControls/JumpPrompt/Row" unique_id=687730092]
-custom_minimum_size = Vector2(16, 16)
+[node name="Glyph" type="PanelContainer" parent="BottomBar/Controls/BasicControls/JumpPrompt/Row" unique_id=687730092]
+custom_minimum_size = Vector2(14, 14)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_glyph_a")
 
-[node name="Label" type="Label" parent="Controls/BasicControls/JumpPrompt/Row/Glyph" unique_id=1406675520]
+[node name="Label" type="Label" parent="BottomBar/Controls/BasicControls/JumpPrompt/Row/Glyph" unique_id=1406675520]
 layout_mode = 2
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 8
 text = "A"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CrouchPrompt" type="PanelContainer" parent="Controls/BasicControls" unique_id=1032764899]
-custom_minimum_size = Vector2(0, 28)
+[node name="CrouchPrompt" type="PanelContainer" parent="BottomBar/Controls/BasicControls" unique_id=1032764899]
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
-[node name="Row" type="HBoxContainer" parent="Controls/BasicControls/CrouchPrompt" unique_id=1958604317]
+[node name="Row" type="HBoxContainer" parent="BottomBar/Controls/BasicControls/CrouchPrompt" unique_id=1958604317]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 5
 
-[node name="Label" type="Label" parent="Controls/BasicControls/CrouchPrompt/Row" unique_id=247150398]
+[node name="Label" type="Label" parent="BottomBar/Controls/BasicControls/CrouchPrompt/Row" unique_id=247150398]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 11
 text = "Crouch"
 vertical_alignment = 1
 
-[node name="Glyph" type="PanelContainer" parent="Controls/BasicControls/CrouchPrompt/Row" unique_id=1785209346]
-custom_minimum_size = Vector2(16, 16)
+[node name="Glyph" type="PanelContainer" parent="BottomBar/Controls/BasicControls/CrouchPrompt/Row" unique_id=1785209346]
+custom_minimum_size = Vector2(14, 14)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_glyph_stick")
 
-[node name="Label" type="Label" parent="Controls/BasicControls/CrouchPrompt/Row/Glyph" unique_id=371926458]
+[node name="Label" type="Label" parent="BottomBar/Controls/BasicControls/CrouchPrompt/Row/Glyph" unique_id=371926458]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.13, 0.16, 1)
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 7
 text = "R"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Bars" type="VBoxContainer" parent="." unique_id=1129385067]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -132.0
-offset_top = -58.0
-offset_right = 132.0
-offset_bottom = -16.0
-grow_horizontal = 2
-grow_vertical = 0
+[node name="Bars" type="VBoxContainer" parent="BottomBar" unique_id=1129385067]
+layout_mode = 2
+size_flags_vertical = 8
 mouse_filter = 2
 theme_override_constants/separation = 6
 alignment = 2
 
-[node name="BabyEnergyBar" type="ProgressBar" parent="Bars" unique_id=1502974316]
-custom_minimum_size = Vector2(264, 18)
+[node name="BabyEnergyBar" type="ProgressBar" parent="BottomBar/Bars" unique_id=1502974316]
+custom_minimum_size = Vector2(180, 18)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
@@ -259,7 +264,7 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_bar_energy")
 value = 100.0
 show_percentage = false
 
-[node name="Label" type="Label" parent="Bars/BabyEnergyBar" unique_id=917341552]
+[node name="Label" type="Label" parent="BottomBar/Bars/BabyEnergyBar" unique_id=917341552]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -272,8 +277,8 @@ theme_override_font_sizes/font_size = 11
 text = "Baby Energy"
 vertical_alignment = 1
 
-[node name="HealthBar" type="ProgressBar" parent="Bars" unique_id=1666391087]
-custom_minimum_size = Vector2(264, 18)
+[node name="HealthBar" type="ProgressBar" parent="BottomBar/Bars" unique_id=1666391087]
+custom_minimum_size = Vector2(180, 18)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
@@ -281,7 +286,7 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_bar_health")
 value = 100.0
 show_percentage = false
 
-[node name="Label" type="Label" parent="Bars/HealthBar" unique_id=1304458829]
+[node name="Label" type="Label" parent="BottomBar/Bars/HealthBar" unique_id=1304458829]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -293,6 +298,124 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 11
 text = "Health"
 vertical_alignment = 1
+
+[node name="BabyControls" type="HFlowContainer" parent="BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 8
+mouse_filter = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+alignment = 2
+last_wrap_alignment = 3
+
+[node name="MoveBubblePrompt" type="PanelContainer" parent="BottomBar/BabyControls"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill_weapon")
+
+[node name="Row" type="HBoxContainer" parent="BottomBar/BabyControls/MoveBubblePrompt"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="BottomBar/BabyControls/MoveBubblePrompt/Row"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Move bubble"
+vertical_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="BottomBar/BabyControls/MoveBubblePrompt/Row"]
+texture_filter = 2
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("icon_l_stick_all")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SlowTimePrompt" type="PanelContainer" parent="BottomBar/BabyControls"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill_weapon")
+
+[node name="Row" type="HBoxContainer" parent="BottomBar/BabyControls/SlowTimePrompt"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="BottomBar/BabyControls/SlowTimePrompt/Row"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Slow down time"
+vertical_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="BottomBar/BabyControls/SlowTimePrompt/Row"]
+texture_filter = 2
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("icon_r_stick_left")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SpeedTimePrompt" type="PanelContainer" parent="BottomBar/BabyControls"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill_weapon")
+
+[node name="Row" type="HBoxContainer" parent="BottomBar/BabyControls/SpeedTimePrompt"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="BottomBar/BabyControls/SpeedTimePrompt/Row"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Speed up time"
+vertical_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="BottomBar/BabyControls/SpeedTimePrompt/Row"]
+texture_filter = 2
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("icon_r_stick_right")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RewindTimePrompt" type="PanelContainer" parent="BottomBar/BabyControls"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill_weapon")
+
+[node name="Row" type="HBoxContainer" parent="BottomBar/BabyControls/RewindTimePrompt"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="BottomBar/BabyControls/RewindTimePrompt/Row"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Rewind time"
+vertical_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="BottomBar/BabyControls/RewindTimePrompt/Row"]
+texture_filter = 2
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("icon_y")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="WeaponPopup" type="PanelContainer" parent="." unique_id=1440912630]
 visible = false

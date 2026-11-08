@@ -105,13 +105,15 @@ func _on_slide_cooldown_timer_timeout() -> void:
 
 # Bullet logic
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventJoypadMotion or event is InputEventJoypadButton:
+	# Only controller 1 (device 0) is the father's; controller 2 belongs to the baby.
+	if (event is InputEventJoypadMotion or event is InputEventJoypadButton) and event.device == 0:
 		is_using_controller = true
-	
+
+func _process(delta: float) -> void:
+	# Checked once per frame so one RT pull / click fires exactly one bullet.
 	if Input.is_action_just_pressed("shoot"):
 		shoot()
-		
-func _process(delta: float) -> void:
+
 	if is_using_controller:
 		var aim_vector = Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
 		
