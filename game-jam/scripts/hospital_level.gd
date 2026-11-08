@@ -43,6 +43,13 @@ func _ready() -> void:
 	_setup_health()
 	_setup_energy()
 	_add_soothe_prompt()
+	_add_end_trigger()
+	# Restarted from the end screen: go straight into the game, no main menu.
+	if EndScreen.skip_menu_once:
+		EndScreen.skip_menu_once = false
+		var menu := get_node_or_null("MainMenu")
+		if menu and menu.has_method("_start_game"):
+			menu.call_deferred("_start_game")
 
 
 func _process(delta: float) -> void:
@@ -326,3 +333,23 @@ func _add_soothe_prompt() -> void:
 		blue.bg_color = Color(0.2, 0.45, 0.9)
 		glyph.add_theme_stylebox_override("panel", blue)
 	jump.get_parent().add_child(p)
+
+
+# --- The end (for now): past Room 6's exit door ---
+func _add_end_trigger() -> void:
+	var screen := EndScreen.new()
+	screen.name = "EndScreen"
+	add_child(screen)
+	var trig := Area2D.new()
+	trig.name = "EndTrigger"
+	trig.position = Vector2(4172, 32)      # the nook just past Room 6's exit door
+	var cs := CollisionShape2D.new()
+	var r := RectangleShape2D.new()
+	r.size = Vector2(32, 64)
+	cs.shape = r
+	trig.add_child(cs)
+	add_child(trig)
+	trig.body_entered.connect(func(body: Node) -> void:
+		if body == father:
+			screen.show_end())
+
