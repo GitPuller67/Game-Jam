@@ -1,7 +1,7 @@
 class_name BubbleButton
-extends Area2D
+extends Interactable
 ## Anything the baby can "press" with the bubble (keypads, switches...).
-## The bubble finds it through the "interactable" group and calls interact().
+## The baby presses Y with the bubble over it, and the bubble calls press().
 
 signal pressed
 
@@ -14,7 +14,7 @@ func _ready() -> void:
 	monitoring = false
 
 
-func interact() -> void:
+func press() -> void:
 	if one_shot and used:
 		return
 	used = true
