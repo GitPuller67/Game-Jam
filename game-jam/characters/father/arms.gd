@@ -1,11 +1,11 @@
 extends Node2D
 
-## The father's arms. The arm on the side the player is aiming at pivots on its
-## shoulder to point at the aim; the other arm hangs down. When the aim crosses
-## the father's midpoint, the arms swap.
+## The father's aiming arm. The father always turns to face where he's aiming,
+## so his front arm pivots on its shoulder to point at the aim and holds a
+## scalpel sideways in its fist. The back arm is left as drawn in his animations.
 ##
-## The body uses player_armless.png (player.png with the drawn-in forearms
-## removed), and each arm is player_arm.png drawn pointing right with the
+## The body uses player_armless.png (player.png with the front forearm
+## removed), and the aiming arm is player_arm.png drawn pointing right with the
 ## shoulder pivot at pixel (2, 2).
 
 
@@ -24,54 +24,67 @@ const TORSO_SHIFT: Dictionary[StringName, float] = { &"slide": -1.0 }
 const SHOULDER_DROP: float = 3.5
 ## Shoulder x inside the frame when facing right (pixel centers).
 const FRONT_SHOULDER_X: float = 20.5
-const BACK_SHOULDER_X: float = 5.5
 const DEFAULT_FRAME_SIZE := Vector2(35, 51)
 
 
 # --- Exported variables ---
 @export var father_sprite: AnimatedSprite2D
-## Angle of the arm that isn't aiming (radians, 0 = right, PI/2 = straight down).
-@export var hang_angle: float = PI / 2
-## How far (as a fraction of a full sideways aim) the aim must cross the
-## midpoint before the hands swap. Stops flickering when aiming straight up/down.
-@export_range(0.0, 0.5) var switch_threshold: float = 0.1
+
+@export_group("Held scalpel")
+## Distance from the shoulder pivot to the hand along the arm.
+@export var hand_distance: float = 11.0
+## The scalpel is held sideways (blade up, edge forward) by its handle; this is
+## how far the scalpel's center sits above the fist.
+@export var grip_offset: float = 4.0
+## Seconds the hand stays empty after a throw before the next scalpel appears.
+@export var rearm_time: float = 0.15
 
 
 # --- Regular variables ---
-var aiming_right: bool = true
+var _rearm_left: float = 0.0
 
 
 # --- @onready variables ---
 @onready var father: Father = owner
 @onready var front_arm: Sprite2D = $FrontArm
-@onready var back_arm: Sprite2D = $BackArm
+@onready var held_scalpel: Sprite2D = $HeldScalpel
 
 
 # --- Built-in functions ---
-func _process(_delta: float) -> void:
+func _ready() -> void:
+	father.shot.connect(func() -> void: _rearm_left = rearm_time)
+
+
+func _process(delta: float) -> void:
 	var flipped := father_sprite.flip_h
 	front_arm.position = _shoulder_position(FRONT_SHOULDER_X, flipped)
-	back_arm.position = _shoulder_position(BACK_SHOULDER_X, flipped)
 
-	# Which side of the father's midpoint the aim is on.
-	var aim_x := cos(father.current_aim_angle)
-	if absf(aim_x) > switch_threshold:
-		aiming_right = aim_x > 0.0
+	# The father turns to face his aim (see Father._face_aim), so the front arm aims.
+	var angle := _aim_angle_from(front_arm.global_position)
+	front_arm.global_rotation = angle
+	front_arm.flip_v = flipped # keep the light side of the arm on top
 
-	# Facing right, the front shoulder is on the right; facing left, it's the back one.
-	var front_is_right := not flipped
-	var aiming_arm := front_arm if aiming_right == front_is_right else back_arm
-	var hanging_arm := back_arm if aiming_arm == front_arm else front_arm
-
-	var angle := _aim_angle_from(aiming_arm.global_position)
-	aiming_arm.global_rotation = angle
-	aiming_arm.flip_v = cos(angle) < 0.0 # keep the light side of the arm on top
-
-	hanging_arm.rotation = hang_angle
-	hanging_arm.flip_v = flipped
+	_update_held_scalpel(front_arm, angle, flipped, delta)
 
 
 # --- Helpers ---
+## Puts a scalpel sideways in the aiming hand (perpendicular to the arm, blade
+## up, cutting edge forward) and moves the father's Muzzle onto it so thrown
+## scalpels leave from the hand.
+func _update_held_scalpel(arm: Sprite2D, angle: float, flipped: bool, delta: float) -> void:
+	var hand := arm.global_position + Vector2.from_angle(angle) * hand_distance
+	# Facing left everything is mirrored, so "up" is the other perpendicular.
+	var scalpel_angle := angle + (PI / 2 if flipped else -PI / 2)
+	held_scalpel.global_rotation = scalpel_angle
+	held_scalpel.flip_v = flipped
+	held_scalpel.global_position = hand + Vector2.from_angle(scalpel_angle) * grip_offset
+	held_scalpel.z_index = arm.z_index
+	father.muzzle.global_position = held_scalpel.global_position
+
+	_rearm_left = maxf(_rearm_left - delta, 0.0)
+	held_scalpel.visible = father.current_ammo > 0 and _rearm_left == 0.0
+
+
 ## The direction the arm should point from its shoulder. With the mouse, aim at
 ## the cursor itself so the arm points right at it even up close.
 func _aim_angle_from(shoulder: Vector2) -> float:

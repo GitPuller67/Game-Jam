@@ -6,6 +6,7 @@ extends CharacterBody2D
 signal health_changed(new_health: int, max_health: int)
 signal died
 signal state_changed(new_state: State)
+signal shot
 
 
 # --- Enums ---
@@ -81,6 +82,11 @@ var has_jumped: bool = false
 var current_ammo: int = 0
 
 # Aim
+@export_group("Aiming")
+## How far past straight up/down the aim must go before he turns around
+## (fraction of a fully sideways aim). Stops him flipping back and forth when
+## aiming straight up or down.
+@export_range(0.0, 0.5) var turn_threshold: float = 0.1
 var current_aim_angle: float = 0.0
 var is_using_controller: bool = false
 
@@ -115,8 +121,22 @@ func _process(delta: float) -> void:
 		var mouse_pos = get_global_mouse_position()
 		current_aim_angle = muzzle.global_position.direction_to(mouse_pos).angle()
 		
-	aim_laser.global_rotation = current_aim_angle	
+	aim_laser.global_rotation = current_aim_angle
+	_face_aim()	
 		
+## Turns the father to face the side he's aiming at. Measured from his center
+## (not the hand) so the hand moving when he turns can't flip him back.
+func _face_aim() -> void:
+	var aim_x: float
+	if is_using_controller:
+		aim_x = cos(current_aim_angle)
+	else:
+		aim_x = (get_global_mouse_position() - global_position).normalized().x
+	if absf(aim_x) > turn_threshold:
+		facing_direction = 1 if aim_x > 0.0 else -1
+		animated_sprite.flip_h = facing_direction < 0
+
+
 func shoot() -> void:
 	if current_ammo <= 0:
 		return
@@ -128,8 +148,11 @@ func shoot() -> void:
 	
 	new_bullet.global_position = muzzle.global_position
 	new_bullet.global_rotation = current_aim_angle
-	
+	new_bullet.shooter = self
+	new_bullet.mirrored = animated_sprite.flip_h
+
 	get_tree().current_scene.add_child(new_bullet)
+	shot.emit()
 
 # --- Built-in functions ---
 func _physics_process(delta: float) -> void:
@@ -160,11 +183,7 @@ func _physics_process(delta: float) -> void:
 	# Get the input direction: -1, 0, 1
 	var direction := Input.get_axis("move_left", "move_right")
 
-	# Flip the sprite
-	if direction > 0:
-		animated_sprite.flip_h = false
-	elif direction < 0:
-		animated_sprite.flip_h = true
+	# Facing follows the aim, not movement (see _face_aim).
 
 	# Play animations
 	if is_sliding:
