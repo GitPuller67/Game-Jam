@@ -68,6 +68,13 @@ var has_jumped: bool = false
 var time_scale: float = 1.0
 ## The bubble hovers over this to control his time / rewind him.
 var time_handle: TimeSlowTarget
+
+@export_group("Soothing")
+## Hold X (controller 1) to soothe the baby: he stands still and the baby's energy refills this fast (per second).
+@export var soothe_rate: float = 35.0
+var is_soothing: bool = false
+var _soothe_hearts: CPUParticles2D
+var _soothe_t: float = 0.0
 ## Fastest the baby can speed him up (the stick goes up to 2.5x for everything else).
 @export var max_time_boost: float = 1.5
 
@@ -102,7 +109,9 @@ var is_using_controller: bool = false
 
 func _ready() -> void:
 	current_ammo = max_ammo
+	add_to_group("door_blockable")   # timed doors (Room 6) shove him back if they shut on him
 	_add_time_handle()
+	_add_soothe_hearts()
 	health = max_health
 	health_changed.emit.call_deferred(health, max_health)
 
@@ -241,6 +250,7 @@ func _move_scaled() -> void:
 
 # --- Built-in functions ---
 func _physics_process(delta: float) -> void:
+	var real_delta := delta
 	delta *= time_scale
 	animated_sprite.speed_scale = time_scale
 	# Add the gravity.
@@ -249,6 +259,14 @@ func _physics_process(delta: float) -> void:
 
 	if current_state == State.DEAD:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		_move_scaled()
+		return
+
+	# Soothing the baby: stand still, rock the baby, energy refills.
+	_set_soothing(Input.is_action_pressed("soothe") and is_on_floor() and not is_sliding, real_delta)
+	if is_soothing:
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		animated_sprite.play("default")
 		_move_scaled()
 		return
 		
@@ -311,3 +329,56 @@ func can_jump() -> bool:
 		and time_since_floor <= coyote_time
 		and absf(global_position.x - last_floor_x) <= coyote_distance
 	)
+
+
+# --- Soothing the baby (hold X) ---
+func _set_soothing(on: bool, delta: float) -> void:
+	if on != is_soothing:
+		is_soothing = on
+		_soothe_hearts.emitting = on
+		if not on:
+			baby.sprite.offset = Vector2.ZERO
+			baby.sprite.modulate = Color.WHITE
+	if not on:
+		return
+	_soothe_t += delta
+	# gentle rocking + a warm glow on the baby
+	baby.sprite.offset = Vector2(0, roundf(sin(_soothe_t * 6.0) * 1.0))
+	baby.sprite.modulate = Color(1.15, 1.0, 1.05)
+	_soothe_hearts.global_position = baby.sprite.global_position + Vector2(7, -2)
+	var bubble := baby.get_node_or_null("Bubble")
+	if bubble and bubble.has_method("add_energy"):
+		bubble.add_energy(soothe_rate * delta)
+
+
+func _add_soothe_hearts() -> void:
+	# little 16-bit heart, drawn in code
+	var rows := [".XX.XX.", "XWXXXXX", "XXXXXXX", ".XXXXX.", "..XXX..", "...X..."]
+	var img := Image.create(7, 6, false, Image.FORMAT_RGBA8)
+	for y in rows.size():
+		for x in rows[y].length():
+			var ch: String = rows[y][x]
+			if ch == "X":
+				img.set_pixel(x, y, Color(1.0, 0.42, 0.55))
+			elif ch == "W":
+				img.set_pixel(x, y, Color(1.0, 0.85, 0.9))
+	var p := CPUParticles2D.new()
+	p.name = "SootheHearts"
+	p.texture = ImageTexture.create_from_image(img)
+	p.emitting = false
+	p.amount = 6
+	p.lifetime = 1.2
+	p.direction = Vector2(0, -1)
+	p.spread = 35.0
+	p.gravity = Vector2.ZERO
+	p.initial_velocity_min = 14.0
+	p.initial_velocity_max = 24.0
+	p.scale_amount_min = 0.8
+	p.scale_amount_max = 1.0
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 1))
+	fade.set_color(1, Color(1, 1, 1, 0))
+	p.color_ramp = fade
+	p.z_index = 20
+	add_child(p)
+	_soothe_hearts = p

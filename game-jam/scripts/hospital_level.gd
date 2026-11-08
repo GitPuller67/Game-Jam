@@ -43,6 +43,14 @@ func _ready() -> void:
 	_add_room4_trigger()
 	_setup_health()
 	_setup_energy()
+	_add_soothe_prompt()
+	_add_end_trigger()
+	# Restarted from the end screen: go straight into the game, no main menu.
+	if EndScreen.skip_menu_once:
+		EndScreen.skip_menu_once = false
+		var menu := get_node_or_null("MainMenu")
+		if menu and menu.has_method("_start_game"):
+			menu.call_deferred("_start_game")
 
 
 func _process(delta: float) -> void:
@@ -250,7 +258,7 @@ func _setup_room1() -> void:
 	r1.add_child(btn)
 	btn.pressed.connect(func() -> void:
 		if not exit_door.get("is_open"):
-			ui.open())
+			ui.open.call_deferred())   # deferred: don't pause the game in the middle of input handling
 	ui.solved.connect(func() -> void:
 		keypad.play("unlocked")
 		doctor.turn_hostile()   # the door opening gives the Father away
@@ -311,3 +319,41 @@ func _on_father_died() -> void:
 	if body and body.shape:
 		feet = (body.transform * body.shape.get_rect()).end.y
 	father.call("respawn", _checkpoint - Vector2(0, feet + 1))
+
+
+## Adds a "Soothe [X]" prompt to the HUD next to Jump / Slide / Crouch.
+func _add_soothe_prompt() -> void:
+	var jump := get_node_or_null("HUD/BottomBar/Controls/BasicControls/JumpPrompt") as Control
+	if jump == null:
+		return
+	var p := jump.duplicate() as Control
+	p.name = "SoothePrompt"
+	(p.get_node("Row/Label") as Label).text = "Soothe"
+	(p.get_node("Row/Glyph/Label") as Label).text = "X"
+	var glyph := p.get_node("Row/Glyph") as PanelContainer
+	var style := glyph.get_theme_stylebox("panel")
+	if style is StyleBoxFlat:
+		var blue := (style as StyleBoxFlat).duplicate() as StyleBoxFlat
+		blue.bg_color = Color(0.2, 0.45, 0.9)
+		glyph.add_theme_stylebox_override("panel", blue)
+	jump.get_parent().add_child(p)
+
+
+# --- The end (for now): past Room 6's exit door ---
+func _add_end_trigger() -> void:
+	var screen := EndScreen.new()
+	screen.name = "EndScreen"
+	add_child(screen)
+	var trig := Area2D.new()
+	trig.name = "EndTrigger"
+	trig.position = Vector2(4172, 32)      # the nook just past Room 6's exit door
+	var cs := CollisionShape2D.new()
+	var r := RectangleShape2D.new()
+	r.size = Vector2(32, 64)
+	cs.shape = r
+	trig.add_child(cs)
+	add_child(trig)
+	trig.body_entered.connect(func(body: Node) -> void:
+		if body == father:
+			screen.show_end())
+

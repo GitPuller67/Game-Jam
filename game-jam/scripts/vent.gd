@@ -9,6 +9,8 @@ var is_open := false
 @onready var shape: CollisionShape2D = $Block/Shape
 ## Once open, the lid lies flat and you can stand on it (jump up through it from below).
 var ledge_shape: CollisionShape2D
+## Once flat, the lid drops this far so its top is level with the duct floor.
+const LID_DROP := 11.0
 
 
 func _ready() -> void:
@@ -19,13 +21,14 @@ func _ready() -> void:
 	var r := RectangleShape2D.new()
 	r.size = Vector2(62, 8)
 	ledge_shape.shape = r
-	ledge_shape.position = Vector2(-32, -7)      # matches the lid lying flat (top ~11px above the duct floor)
-	ledge_shape.one_way_collision = true
+	ledge_shape.position = Vector2(-32, 4)       # the lid lies flush with the duct floor: a bridge from the last chunk
+	ledge_shape.one_way_collision = true         # you can still jump up through it from underneath
 	ledge_shape.disabled = true
 	ledge.add_child(ledge_shape)
 	if start_open:
 		is_open = true
 		panel.rotation_degrees = -90.0
+		panel.position.y += LID_DROP
 		shape.disabled = true
 		ledge_shape.disabled = false
 
@@ -43,6 +46,7 @@ func open() -> void:
 	tw.tween_property(panel, "rotation_degrees", -100.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_property(panel, "rotation_degrees", -80.0, 0.15)
 	tw.tween_property(panel, "rotation_degrees", -90.0, 0.12)
+	tw.tween_property(panel, "position:y", panel.position.y + LID_DROP, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_callback(_finish_open)
 
 
