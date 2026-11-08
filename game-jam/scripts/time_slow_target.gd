@@ -11,6 +11,8 @@ signal restored
 @export var targets: Array[Node] = []
 @export var property := &"time_scale"
 @export var slow_factor := 0.25
+## Multiplier while the baby speeds it up (right stick RIGHT).
+@export var speed_factor := 2.0
 ## Unused since slowing became hold-to-slow; kept so existing levels that set it still load.
 @export var slow_duration := 4.0
 ## Tinted blue while slowed so the player can see it worked.
@@ -26,16 +28,25 @@ func _ready() -> void:
 
 
 func slow_down_time() -> void:
+	_apply(slow_factor, Color(0.7, 0.85, 1.25))
+	slowed.emit()
+
+
+func speed_up_time() -> void:
+	_apply(speed_factor, Color(1.25, 0.95, 0.7))
+	slowed.emit()
+
+
+func _apply(factor: float, tint: Color) -> void:
 	if is_slowed:
-		return
+		reset_time()
 	is_slowed = true
 	for t in targets:
 		if is_instance_valid(t):
 			_normal[t] = t.get(property)
-			t.set(property, float(_normal[t]) * slow_factor)
+			t.set(property, float(_normal[t]) * factor)
 	if tint_node:
-		tint_node.modulate = Color(0.7, 0.85, 1.25)
-	slowed.emit()
+		tint_node.modulate = tint
 
 
 func reset_time() -> void:

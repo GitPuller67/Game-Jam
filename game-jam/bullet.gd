@@ -8,7 +8,9 @@ extends Interactable
 
 signal hit(body: Node2D)
 
-@export var speed: float = 800.0
+@export var speed: float = 450.0
+## Damage dealt to anything it hits that has take_damage() (enemies).
+@export var damage: int = 1
 ## How fast the scalpel moves while slowed by the bubble (0.5 = half speed).
 @export var slowed_multiplier: float = 0.5
 ## Tint applied while slowed so the player can see it working.
@@ -61,6 +63,8 @@ func _on_body_entered(body: Node2D) -> void:
 	animated_sprite.flip_v = false
 	animated_sprite.global_rotation = 0.0
 	animated_sprite.play("impact")
+	if body.has_method("take_damage"):
+		body.call("take_damage", damage, global_position)
 	hit.emit(body)
 
 

@@ -38,6 +38,7 @@ func _ready() -> void:
 	_add_time_targets()
 	_hook_hazards()
 	_add_room4_trigger()
+	_setup_health()
 
 
 func _process(delta: float) -> void:
@@ -157,12 +158,12 @@ func _hook_hazards() -> void:
 		if area:
 			area.collision_mask = 1          # detect the Father's body (layer 1)
 			area.monitoring = true
-			area.body_entered.connect(_on_hazard_touched)
+			area.body_entered.connect(_on_hazard_touched.bind(area))
 
 
-func _on_hazard_touched(body: Node) -> void:
+func _on_hazard_touched(body: Node, area: Area2D) -> void:
 	if body == father and father.has_method("take_damage"):
-		father.call("take_damage", 1)
+		father.call("take_damage", 1, area.global_position)
 
 
 func _add_room4_trigger() -> void:
@@ -219,3 +220,45 @@ func _setup_room1() -> void:
 	btn.pressed.connect(func() -> void:
 		keypad.play("unlocked")
 		exit_door.call("open"))
+
+
+# --- Health bar + respawning ---
+## Where the Father comes back after dying: the start of the furthest room he has reached.
+## [x where the room begins, respawn point (feet)]
+const CHECKPOINTS := [
+	[0.0, Vector2(40, 0)],          # Room 1
+	[784.0, Vector2(820, 0)],       # Room 2
+	[1600.0, Vector2(1620, -192)],  # Room 3
+	[2384.0, Vector2(2410, -192)],  # Room 4
+	[3232.0, Vector2(3200, -304)],  # Room 5 (end of the duct, above the drop)
+	[3808.0, Vector2(3830, 64)],    # Room 6
+]
+var _checkpoint := Vector2(40, 0)
+
+
+func _setup_health() -> void:
+	if father.has_signal("health_changed"):
+		father.connect("health_changed", _on_health_changed)
+	if father.has_signal("died"):
+		father.connect("died", _on_father_died)
+
+
+func _physics_process(_delta: float) -> void:
+	for c in CHECKPOINTS:
+		if father.global_position.x >= c[0] and c[1].x > _checkpoint.x:
+			_checkpoint = c[1]
+
+
+func _on_health_changed(new_health: int, max_health: int) -> void:
+	var bar := get_node_or_null("HUD/BottomBar/Bars/HealthBar") as ProgressBar
+	if bar:
+		bar.value = 100.0 * new_health / maxf(max_health, 1)
+
+
+func _on_father_died() -> void:
+	await get_tree().create_timer(1.2, false).timeout
+	var feet := 0.0
+	var body := father.get_node_or_null("StandingCollision") as CollisionShape2D
+	if body and body.shape:
+		feet = (body.transform * body.shape.get_rect()).end.y
+	father.call("respawn", _checkpoint - Vector2(0, feet + 1))

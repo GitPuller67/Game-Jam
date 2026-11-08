@@ -8,7 +8,13 @@ extends Area2D
 
 enum TimeMode { NORMAL, SLOW, FAST }
 
-@export var stick_speed: float = 150.0
+## Top speed with the stick pushed all the way (px/s).
+@export var stick_speed: float = 380.0
+## How quickly it gets up to speed / stops (px/s^2).
+@export var stick_acceleration: float = 2400.0
+## >1 gives finer control with small stick movements, full speed at full tilt.
+@export var stick_curve: float = 1.6
+var _stick_velocity := Vector2.ZERO
 
 var hovered: Array[Interactable] = []
 var using_mouse: bool = true
@@ -46,11 +52,16 @@ func _process(delta: float) -> void:
 
 
 func _move(delta: float) -> void:
+	# Speed follows how far the stick is pushed (dynamic), with a little acceleration.
 	var dir := Input.get_vector("bubble_left", "bubble_right", "bubble_up", "bubble_down")
+	var target_velocity := Vector2.ZERO
 	if dir != Vector2.ZERO:
 		using_mouse = false
-		global_position += dir * stick_speed * delta
-	elif using_mouse:
+		target_velocity = dir.normalized() * stick_speed * pow(minf(dir.length(), 1.0), stick_curve)
+	_stick_velocity = _stick_velocity.move_toward(target_velocity, stick_acceleration * delta)
+	if not using_mouse:
+		global_position += _stick_velocity * delta
+	else:
 		global_position = get_global_mouse_position()
 
 	# Keep the bubble on screen (the camera follows the father)

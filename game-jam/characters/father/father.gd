@@ -19,12 +19,12 @@ const GRAVITY: float = 980.0
 
 # --- Exported variables ---
 @export_group("Movement")
-@export var speed: float = 200.0
+@export var speed: float = 140.0
 @export var acceleration: float = 1200.0
 @export var friction: float = 1000.0
 
 @export_group("Jumping")
-@export var jump_velocity: float = -400.0
+@export var jump_velocity: float = -350.0
 @export var max_jumps: int = 1
 ## Coyote jump: after walking off a ledge you can still jump until you've
 ## moved this many pixels sideways past where you left the ground...
@@ -33,18 +33,22 @@ const GRAVITY: float = 980.0
 @export var coyote_time: float = 0.2
 
 @export_group("Slide")
-@export var slide_speed: float = 350.0
+@export var slide_speed: float = 260.0
 @export var slide_friction: float = 400.0
 @export var slide_duration: float = 0.5
 @export var slide_cooldown: float = 0.3
 @export var min_speed_to_slide: float = 100.0
 
 @export_group("Crouch")
-@export var walk_speed: float = speed
+@export var walk_speed: float = 140.0
 @export var crouch_speed: float = 50.0
 
 @export_group("Health")
 @export var max_health: int = 3
+## Seconds he can't be hurt again after taking a hit (he blinks).
+@export var invincible_time: float = 1.0
+## Push-back when hurt: sideways away from the hit, and up.
+@export var knockback: Vector2 = Vector2(160.0, -160.0)
 
 
 # --- Regular variables ---
@@ -92,6 +96,8 @@ var is_using_controller: bool = false
 
 func _ready() -> void:
 	current_ammo = max_ammo
+	health = max_health
+	health_changed.emit.call_deferred(health, max_health)
 
 func _on_slide_timer_timeout() -> void:
 	is_sliding = false
@@ -156,11 +162,63 @@ func shoot() -> void:
 	get_tree().current_scene.add_child(new_bullet)
 	shot.emit()
 
+# --- Health ---
+## Hurt the father. source_position (optional) is where the hit came from, for knock-back.
+func take_damage(amount: int = 1, source_position: Vector2 = Vector2.INF) -> void:
+	if is_invincible or current_state == State.DEAD:
+		return
+	health = maxi(health - amount, 0)
+	health_changed.emit(health, max_health)
+	if source_position != Vector2.INF:
+		var away := signf(global_position.x - source_position.x)
+		if away == 0.0:
+			away = -facing_direction
+		velocity = Vector2(away * knockback.x, knockback.y)
+	if health <= 0:
+		_die()
+		return
+	is_invincible = true
+	var blink := create_tween().set_loops(int(invincible_time / 0.12))
+	blink.tween_property(visuals, "modulate:a", 0.25, 0.06)
+	blink.tween_property(visuals, "modulate:a", 1.0, 0.06)
+	await get_tree().create_timer(invincible_time, false).timeout
+	visuals.modulate.a = 1.0
+	is_invincible = false
+
+
+func _die() -> void:
+	current_state = State.DEAD
+	state_changed.emit(current_state)
+	visuals.modulate = Color(1.0, 0.45, 0.45)
+	died.emit()
+	# If the level doesn't respawn him (nothing listening to died), restart the scene.
+	if died.get_connections().is_empty():
+		await get_tree().create_timer(1.2, false).timeout
+		get_tree().reload_current_scene()
+
+
+## Bring him back at full health (the level calls this after he dies).
+func respawn(at: Vector2) -> void:
+	global_position = at
+	velocity = Vector2.ZERO
+	health = max_health
+	health_changed.emit(health, max_health)
+	visuals.modulate = Color.WHITE
+	current_state = State.IDLE
+	state_changed.emit(current_state)
+	is_invincible = false
+
+
 # --- Built-in functions ---
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+
+	if current_state == State.DEAD:
+		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
+		move_and_slide()
+		return
 		
 	# Handle crouch.			
 	if velocity.x != 0:
