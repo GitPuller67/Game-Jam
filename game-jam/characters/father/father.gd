@@ -75,6 +75,12 @@ var time_handle: TimeSlowTarget
 var is_soothing: bool = false
 var _soothe_hearts: CPUParticles2D
 var _soothe_t: float = 0.0
+
+## Set by levels for special areas (Room 5's drop): cap how fast he can fall (normal-time px/s)...
+var max_fall_speed: float = INF
+## ...and let his left/right steering ignore time_scale while in the air, so slowing him down
+## slows his fall but not his steering.
+var steer_ignores_time_scale: bool = false
 ## Fastest the baby can speed him up (the stick goes up to 2.5x for everything else).
 @export var max_time_boost: float = 1.5
 
@@ -243,9 +249,13 @@ func _move_scaled() -> void:
 		move_and_slide()
 		return
 	var normal_velocity := velocity
-	velocity = normal_velocity * time_scale
+	var steer_free := steer_ignores_time_scale and not is_on_floor()
+	velocity = Vector2(normal_velocity.x if steer_free else normal_velocity.x * time_scale, normal_velocity.y * time_scale)
 	move_and_slide()
-	velocity = velocity / time_scale if time_scale > 0.001 else normal_velocity
+	if time_scale > 0.001:
+		velocity = Vector2(velocity.x if steer_free else velocity.x / time_scale, velocity.y / time_scale)
+	else:
+		velocity = normal_velocity
 
 
 # --- Built-in functions ---
@@ -256,6 +266,8 @@ func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+
+	velocity.y = minf(velocity.y, max_fall_speed)
 
 	if current_state == State.DEAD:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)

@@ -274,7 +274,7 @@ const CHECKPOINTS := [
 	[1600.0, Vector2(1620, -192)],  # Room 3
 	[2384.0, Vector2(2410, -192)],  # Room 4
 	[3232.0, Vector2(3200, -304)],  # Room 5 (end of the duct, above the drop)
-	[3808.0, Vector2(3830, 64)],    # Room 6
+	[3552.0, Vector2(3574, 560)],   # Room 6 (below the long Room 5 drop)
 ]
 var _checkpoint := Vector2(40, 0)
 
@@ -300,7 +300,15 @@ func _setup_health() -> void:
 		father.connect("died", _on_father_died)
 
 
+## Room 5's shaft: a floaty fall (capped speed) where slowing Dad slows his fall but not his steering.
+const ROOM5_SHAFT := Rect2(3232, -368, 192, 1024)
+@export var room5_max_fall := 420.0
+
+
 func _physics_process(_delta: float) -> void:
+	var in_shaft := ROOM5_SHAFT.has_point(father.global_position)
+	father.set("max_fall_speed", room5_max_fall if in_shaft else INF)
+	father.set("steer_ignores_time_scale", in_shaft)
 	for c in CHECKPOINTS:
 		if father.global_position.x >= c[0] and c[1].x > _checkpoint.x:
 			_checkpoint = c[1]
@@ -346,7 +354,7 @@ func _add_end_trigger() -> void:
 	add_child(screen)
 	var trig := Area2D.new()
 	trig.name = "EndTrigger"
-	trig.position = Vector2(4172, 32)      # the nook just past Room 6's exit door
+	trig.position = Vector2(3916, 528)     # the nook just past Room 6's exit door
 	var cs := CollisionShape2D.new()
 	var r := RectangleShape2D.new()
 	r.size = Vector2(32, 64)
