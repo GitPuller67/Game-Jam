@@ -3,6 +3,7 @@ extends Area2D
 ## The baby's bubble. Moved with the mouse or controller 2's left stick.
 ## - Hold right stick LEFT: slow_down_time() on every interactable in the bubble.
 ## - Hold right stick RIGHT: speed_up_time() on every interactable in the bubble.
+## - Press Y: press() on every interactable in the bubble (keypads, switches...).
 ## Interactables that leave the bubble, or are in it when the stick is let go, get reset_time().
 
 enum TimeMode { NORMAL, SLOW, FAST }
@@ -29,6 +30,13 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		using_mouse = true
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("bubble_press"):
+		for target in hovered:
+			if is_instance_valid(target):
+				target.press()
 
 
 func _process(delta: float) -> void:

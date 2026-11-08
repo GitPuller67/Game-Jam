@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/hospital_level.gd" id="1_0wjhk"]
+[ext_resource type="PackedScene" path="res://scenes/Map.tscn" id="2_snmw6"]
+[ext_resource type="PackedScene" path="res://characters/father/father.tscn" id="3_625kb"]
+[ext_resource type="Script" path="res://characters/father/father.gd" id="4_68aq2"]
+[ext_resource type="PackedScene" path="res://levels/bullet.tscn" id="5_08ivt"]
+[ext_resource type="PackedScene" path="res://characters/enemy/enemy.tscn" id="6_nai1i"]
+[ext_resource type="Script" path="res://characters/enemy/enemy.gd" id="7_rpcow"]
+[ext_resource type="PackedScene" path="res://ui/hud.tscn" id="8_nt3wn"]
+[ext_resource type="PackedScene" path="res://ui/main_menu.tscn" id="9_kc3io"]
+[ext_resource type="Script" path="res://ui/main_menu.gd" id="10_1hayu"]
+
+[node name="HospitalLevel" type="Node2D" unique_id=365072355]
+script = ExtResource("1_0wjhk")
+
+[node name="Backdrop" type="CanvasLayer" parent="." unique_id=46467865]
+layer = -100
+
+[node name="Colour" type="ColorRect" parent="Backdrop" unique_id=1556867387]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.055, 0.06, 0.1, 1)
+
+[node name="Map" type="Node2D" parent="." unique_id=1207621321 instance=ExtResource("2_snmw6")]
+
+[node name="Father" type="CharacterBody2D" parent="." unique_id=2008592885 instance=ExtResource("3_625kb")]
+z_index = 5
+position = Vector2(40, -27)
+script = ExtResource("4_68aq2")
+slide_duration = 0.8
+slide_cooldown = 0.1
+walk_speed = 200.0
+bullet_scene = ExtResource("5_08ivt")
+
+[node name="Enemy" type="CharacterBody2D" parent="." unique_id=1550252557 instance=ExtResource("6_nai1i")]
+position = Vector2(1980, -222)
+script = ExtResource("7_rpcow")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1873402219 instance=ExtResource("8_nt3wn")]
+
+[node name="MainMenu" type="CanvasLayer" parent="." unique_id=1735520946 node_paths=PackedStringArray("hud") instance=ExtResource("9_kc3io")]
+process_mode = 3
+layer = 10
+visible = false
+script = ExtResource("10_1hayu")
+hud = NodePath("../HUD")
