@@ -1,0 +1,88 @@
+[gd_scene format=3 uid="uid://bfbygu8vtje3a"]
+
+[ext_resource type="Script" uid="uid://kjuhsiqrt7j7" path="res://ui/main_menu.gd" id="1_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_normal"]
+bg_color = Color(0.153, 0.4, 0.725, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_hover"]
+bg_color = Color(0.2, 0.463, 0.8, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_pressed"]
+bg_color = Color(0.118, 0.325, 0.6, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_focus"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 3.0
+expand_margin_top = 3.0
+expand_margin_right = 3.0
+expand_margin_bottom = 3.0
+
+[node name="MainMenu" type="CanvasLayer" unique_id=1735520946]
+process_mode = 3
+layer = 10
+visible = false
+script = ExtResource("1_menu")
+
+[node name="Dim" type="ColorRect" parent="." unique_id=1146095361]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=627301884]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Menu" type="VBoxContainer" parent="Center" unique_id=1987354021]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Center/Menu" unique_id=468190237]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Time Baby"
+horizontal_alignment = 1
+
+[node name="PlayButton" type="Button" parent="Center/Menu" unique_id=1218840573]
+custom_minimum_size = Vector2(296, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_play_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_play_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_play_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_play_focus")
+text = "Play"
